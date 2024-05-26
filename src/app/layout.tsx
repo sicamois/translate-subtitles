@@ -97,6 +97,7 @@ const fontSans = localFont({
     },
   ],
   variable: '--font-sans',
+  preload: false,
 });
 
 export const metadata: Metadata = {
