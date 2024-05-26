@@ -34,7 +34,7 @@ export async function uploadFile(
         fs.constants.R_OK | fs.constants.W_OK
       );
     } catch (error) {
-      await fs.mkdir('./public/uploads');
+      await fs.mkdir('./public/uploads', { mode: 611 });
     }
 
     await fs.writeFile(`./public/uploads/${file.name}`, buffer);
