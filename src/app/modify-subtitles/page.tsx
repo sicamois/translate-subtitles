@@ -36,8 +36,8 @@ export default async function ModifySubtitles({
       <h1 className='text-center text-4xl font-thin drop-shadow-sm mb-4'>
         {videoTitle}
       </h1>
-      <h2 className='text-center text-xl font-thin drop-shadow-sm mb-4'>
-        Modify Subtitles
+      <h2 className='text-center text-xl italic font-thin drop-shadow-sm mb-4'>
+        Traduire les sous-titres
       </h2>
       <form className='flex flex-col gap-2 p-4'>
         {subtitles.map((subtitle, index) => (
@@ -47,7 +47,7 @@ export default async function ModifySubtitles({
             </CardTitle>
             <CardContent
               id={`subtitle-${index}`}
-              className='text-base bg-muted text-muted-foreground p-2 w-max shrink-0 rounded-md group-focus-within:bg-primary group-focus-within:text-primary-foreground'
+              className='text-base bg-muted text-muted-foreground p-2 w-max shrink-0 rounded-md group-focus-within:bg-secondary group-focus-within:text-secondary-foreground transition-colors duration-200 ease-in-out'
             >
               {subtitle?.subtitle}
             </CardContent>
