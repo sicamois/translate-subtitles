@@ -9,23 +9,12 @@ import { uploadFile } from '@/app/actions';
 
 const initialState: {
   message: string;
-  xmlData?: string;
 } = {
   message: '',
 };
 
-export function UploadFile({
-  setXmlData,
-}: {
-  setXmlData: React.Dispatch<React.SetStateAction<string | undefined>>;
-}) {
+export function UploadFile() {
   const [state, formAction] = useActionState(uploadFile, initialState);
-
-  useEffect(() => {
-    if (state?.xmlData) {
-      setXmlData(state.xmlData);
-    }
-  }, [state?.xmlData, setXmlData]);
 
   function SubmitButton() {
     const { pending } = useFormStatus();

@@ -1,5 +1,9 @@
-import App from '@/components/App';
+import { UploadFile } from '@/components/uploadFile';
 
 export default function Home() {
-  return <App />;
+  return (
+    <main className='h-screen'>
+      <UploadFile />
+    </main>
+  );
 }

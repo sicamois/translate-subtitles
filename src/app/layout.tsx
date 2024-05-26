@@ -117,7 +117,17 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
-        {children}
+        <div className='font-sans flex flex-col items-center justify-items-center min-h-screen pb-20'>
+          <header className='flex justify-center items-center gap-8 bg-muted w-full p-2'>
+            <p className='text-4xl font-bold text-muted-foreground text-center'>
+              Translate Subtitles
+            </p>
+          </header>
+          <main className='flex flex-col gap-8 row-start-2 items-center sm:items-start p-8  sm:p-10 sm:px-20'>
+            {children}
+          </main>
+          <footer className='row-start-3 flex gap-6 flex-wrap items-center justify-center'></footer>
+        </div>
       </body>
     </html>
   );

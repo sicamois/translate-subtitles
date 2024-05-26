@@ -1,11 +1,13 @@
 'use server';
 
 import { z } from 'zod';
+import fs from 'node:fs/promises';
+import { permanentRedirect } from 'next/navigation';
+import { encrypt } from '@/lib/utils';
 
 export async function uploadFile(
   prevState: {
     message: string;
-    xmlData?: string;
   },
   formData: FormData
 ) {
@@ -20,14 +22,19 @@ export async function uploadFile(
     return { message: 'Erreur lors de la récupération du fichier' };
   }
 
-  const data = parse.data;
+  const file = parse.data.file;
 
   try {
-    const arrayBuffer = await data.file.arrayBuffer();
+    const arrayBuffer = await file.arrayBuffer();
     const buffer = new Uint8Array(arrayBuffer);
-    const xmlData = new TextDecoder().decode(buffer);
-    return { message: 'Fichier chargé', xmlData };
+
+    await fs.writeFile(`./public/uploads/${file.name}`, buffer);
   } catch (e) {
-    return { message: 'Erreur lors de la récupération du fichier' };
+    console.error(e);
+    return { message: "Erreur lors de l'écriture du fichier" };
   }
+
+  const encryptedFilename = encrypt(file.name, process.env.KEY!);
+
+  permanentRedirect(`/modify-subtitles?file=${encryptedFilename}`);
 }
