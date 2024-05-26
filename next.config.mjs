@@ -5,7 +5,7 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '4.5mb',
     },
-    ppr: 'incremental',
+    // ppr: 'incremental',
   },
 };
 
