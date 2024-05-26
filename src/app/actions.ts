@@ -28,6 +28,15 @@ export async function uploadFile(
     const arrayBuffer = await file.arrayBuffer();
     const buffer = new Uint8Array(arrayBuffer);
 
+    try {
+      await fs.access(
+        './public/uploads',
+        fs.constants.R_OK | fs.constants.W_OK
+      );
+    } catch (error) {
+      await fs.mkdir('./public');
+    }
+
     await fs.writeFile(`./public/uploads/${file.name}`, buffer);
   } catch (e) {
     console.error(e);
