@@ -42,7 +42,7 @@ export function UploadFile() {
       </Label>
       <Input className='text-lg' type='file' id='file' name='file' required />
       <SubmitButton />
-      <p aria-live='polite' className='sr-onlye' role='status'>
+      <p aria-live='polite' className='sr-only' role='status'>
         {state?.message}
       </p>
     </form>
