@@ -3,9 +3,10 @@
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Button } from './ui/button';
-import { useActionState, useEffect } from 'react';
+import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { uploadFile } from '@/app/actions';
+import Spinner from './Spinner';
 
 const initialState: {
   message: string;
@@ -21,12 +22,14 @@ export function UploadFile() {
 
     return (
       <Button
-        className='w-fit mt-8 text-lg'
+        className='flex gap-2 w-fit mt-8 text-lg'
         size={'lg'}
         type='submit'
+        disabled={pending}
         aria-disabled={pending}
       >
-        Télécharger
+        {pending && <Spinner />}
+        {pending ? 'Téléchargement en cours...' : 'Télécharger'}
       </Button>
     );
   }

@@ -37,3 +37,4 @@ next-env.d.ts
 
 # uploaded files in dev
 /public/uploads
+.env*.local

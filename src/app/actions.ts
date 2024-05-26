@@ -1,9 +1,9 @@
 'use server';
 
 import { z } from 'zod';
-import fs from 'node:fs/promises';
 import { permanentRedirect } from 'next/navigation';
 import { encrypt } from '@/lib/utils';
+import { type PutBlobResult, put } from '@vercel/blob';
 
 export async function uploadFile(
   prevState: {
@@ -23,18 +23,19 @@ export async function uploadFile(
   }
 
   const file = parse.data.file;
+  let blob: PutBlobResult;
 
   try {
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = new Uint8Array(arrayBuffer);
+    // const buffer = new Uint8Array(arrayBuffer);
 
-    await fs.writeFile(`.public/${file.name}`, buffer);
+    blob = await put(file.name, arrayBuffer, { access: 'public' });
   } catch (e) {
     console.error(e);
     return { message: "Erreur lors de l'écriture du fichier" };
   }
 
-  const encryptedFilename = encrypt(file.name, process.env.KEY!);
+  const encryptedFile = encrypt(blob.url, process.env.KEY!);
 
-  permanentRedirect(`/modify-subtitles?file=${encryptedFilename}`);
+  permanentRedirect(`/modify-subtitles?file=${encryptedFile}`);
 }
