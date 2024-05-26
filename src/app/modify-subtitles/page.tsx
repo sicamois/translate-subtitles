@@ -14,7 +14,7 @@ export default async function ModifySubtitles({
     notFound();
   }
   const filename = decrypt(encryptedFilename, process.env.KEY!);
-  const xmlData = await fs.readFile(`/uploads/${filename}`, 'utf-8');
+  const xmlData = await fs.readFile(`.public/${filename}`, 'utf-8');
 
   const regexVideoTitle = '<media id="[^"]*" name="(?<video_title>[^"]*)"';
   const matchVideoTitle = xmlData.match(new RegExp(regexVideoTitle));
