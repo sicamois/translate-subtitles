@@ -43,11 +43,11 @@ export default function App() {
           </CardTitle>
           <CardContent
             id={`subtitle-${index}`}
-            className='text-lg bg-primary text-muted-foreground rounded p-1 px-2 w-max shrink-0'
+            className='text-base bg-primary rounded p-1 px-2 w-max shrink-0'
           >
             {subtitle?.subtitle}
           </CardContent>
-          <Input className='bg-muted-foreground text-muted' />
+          <Input className='bg-muted-foreground text-muted text-base' />
         </Card>
       ))}
     </form>
