@@ -42,8 +42,12 @@ export default async function ModifySubtitles({
       <form className='flex flex-col gap-2 p-4'>
         {subtitles.map((subtitle, index) => (
           <Card key={index} className='flex gap-2 p-2 items-center group'>
-            <CardTitle className='p-2 text-base font-light shrink-0'>
-              <span className='font-medium'>{index + 1}</span> ∙ {subtitle?.ref}
+            <CardTitle className='flex gap-1 p-2 text-base font-light shrink-0'>
+              <p className='font-medium'>{index + 1}</p>
+              <p>∙</p>
+              <p className='group-focus-within:text-secondary'>
+                {subtitle?.ref}
+              </p>
             </CardTitle>
             <CardContent
               id={`subtitle-${index}`}
