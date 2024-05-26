@@ -40,7 +40,14 @@ export function UploadFile() {
         Sélectionner le fichier Final Cut Pro <code>.fcpxml</code> contenant les
         sous-titres{' '}
       </Label>
-      <Input className='text-lg' type='file' id='file' name='file' required />
+      <Input
+        className='text-lg'
+        type='file'
+        id='file'
+        name='file'
+        accept='.fcpxml'
+        required
+      />
       <SubmitButton />
       <p aria-live='polite' className='sr-only' role='status'>
         {state?.message}

@@ -29,15 +29,12 @@ export async function uploadFile(
     const buffer = new Uint8Array(arrayBuffer);
 
     try {
-      await fs.access(
-        './public/uploads',
-        fs.constants.R_OK | fs.constants.W_OK
-      );
+      await fs.access('/uploads', fs.constants.R_OK | fs.constants.W_OK);
     } catch (error) {
-      await fs.mkdir('./public/uploads', { mode: 611 });
+      await fs.mkdir('/uploads', { mode: 611 });
     }
 
-    await fs.writeFile(`./public/uploads/${file.name}`, buffer);
+    await fs.writeFile(`/uploads/${file.name}`, buffer);
   } catch (e) {
     console.error(e);
     return { message: "Erreur lors de l'écriture du fichier" };
