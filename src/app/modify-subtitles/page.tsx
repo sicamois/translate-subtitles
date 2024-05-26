@@ -55,6 +55,7 @@ export default async function ModifySubtitles({
             >
               {subtitle?.subtitle}
             </CardContent>
+            <p>→</p>
             <Input
               className='bg-muted-foreground text-muted text-base'
               defaultValue={subtitle?.subtitle}
