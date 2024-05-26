@@ -48,7 +48,7 @@ export function UploadFile({
       action={formAction}
     >
       <Label htmlFor='file'>
-        Sélectionner le fichier Final Cut Pro <code>.xmlfcp</code> contenant les
+        Sélectionner le fichier Final Cut Pro <code>.fcpxml</code> contenant les
         sous-titres{' '}
       </Label>
       <Input className='text-lg' type='file' id='file' name='file' required />
