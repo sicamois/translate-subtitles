@@ -24,7 +24,7 @@ export default async function ModifySubtitles({
   );
 
   if (Body === undefined) {
-    notFound();
+    throw new Error('Impossible de lire le fichier ' + filename);
   }
 
   const xmlData = await Body.transformToString();
