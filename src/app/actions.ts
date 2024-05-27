@@ -3,7 +3,12 @@
 import { z } from 'zod';
 import { permanentRedirect } from 'next/navigation';
 import { encrypt } from '@/lib/utils';
-import { type PutBlobResult, put } from '@vercel/blob';
+
+import {
+  S3Client,
+  PutObjectCommand,
+  PutObjectCommandOutput,
+} from '@aws-sdk/client-s3';
 
 export async function uploadFile(
   prevState: {
@@ -11,6 +16,8 @@ export async function uploadFile(
   },
   formData: FormData
 ) {
+  const s3Client = new S3Client({ region: 'eu-west-3' });
+
   const schema = z.object({
     file: z.instanceof(File),
   });
@@ -23,19 +30,25 @@ export async function uploadFile(
   }
 
   const file = parse.data.file;
-  let blob: PutBlobResult;
+  let s3output: PutObjectCommandOutput;
 
   try {
+    // Put an object into an Amazon S3 bucket.
     const arrayBuffer = await file.arrayBuffer();
-    // const buffer = new Uint8Array(arrayBuffer);
-
-    blob = await put(file.name, arrayBuffer, { access: 'public' });
+    const buffer = new Uint8Array(arrayBuffer);
+    s3output = await s3Client.send(
+      new PutObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: file.name,
+        Body: buffer,
+      })
+    );
   } catch (e) {
     console.error(e);
-    return { message: "Erreur lors de l'écriture du fichier" };
+    return { message: 'Erreur lors du téléchargement du fichier' };
   }
 
-  const encryptedFile = encrypt(blob.url, process.env.KEY!);
+  const encryptedFile = encrypt(file.name, process.env.KEY!);
 
   permanentRedirect(`/modify-subtitles?file=${encryptedFile}`);
 }

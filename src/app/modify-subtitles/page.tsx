@@ -1,6 +1,7 @@
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { decrypt } from '@/lib/utils';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { notFound } from 'next/navigation';
 
 export default async function ModifySubtitles({
@@ -8,13 +9,25 @@ export default async function ModifySubtitles({
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
+  const s3Client = new S3Client({ region: 'eu-west-3' });
   const encryptedFilename = searchParams.file;
   if (!encryptedFilename || typeof encryptedFilename !== 'string') {
     notFound();
   }
-  const fileUrl = decrypt(encryptedFilename, process.env.KEY!);
-  const xmlFile = await fetch(fileUrl);
-  const xmlData = await xmlFile.text();
+  const filename = decrypt(encryptedFilename, process.env.KEY!);
+  // Read the object.
+  const { Body } = await s3Client.send(
+    new GetObjectCommand({
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Key: filename,
+    })
+  );
+
+  if (Body === undefined) {
+    notFound();
+  }
+
+  const xmlData = await Body.transformToString();
 
   const regexVideoTitle = '<media id="[^"]*" name="(?<video_title>[^"]*)"';
   const matchVideoTitle = xmlData.match(new RegExp(regexVideoTitle));
@@ -57,6 +70,8 @@ export default async function ModifySubtitles({
             <p>→</p>
             <Input
               className='bg-muted-foreground text-muted text-base'
+              id={subtitle?.ref}
+              name={subtitle?.ref}
               defaultValue={subtitle?.subtitle}
             />
           </Card>
