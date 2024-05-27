@@ -39,7 +39,7 @@ export function UploadFile() {
       className='flex flex-col gap-3 items-center m-auto'
       action={formAction}
     >
-      <Label htmlFor='file'>
+      <Label htmlFor='file' className='text-center'>
         Sélectionner le fichier Final Cut Pro <code>.fcpxml</code> contenant les
         sous-titres{' '}
       </Label>

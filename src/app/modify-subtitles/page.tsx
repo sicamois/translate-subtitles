@@ -2,7 +2,6 @@ import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { decrypt } from '@/lib/utils';
 import { notFound } from 'next/navigation';
-import fs from 'node:fs/promises';
 
 export default async function ModifySubtitles({
   searchParams,
