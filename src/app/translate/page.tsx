@@ -1,7 +1,8 @@
-import { DownloadFile } from '@/components/DownloadFile';
 import { decrypt } from '@/lib/utils';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { notFound } from 'next/navigation';
+import { extractNameAndSubtitles } from '@/lib/fcpxmlParser';
+import TranslateSubtitles from '@/components/TranslateSubtitles';
 
 export type Subtitle = {
   subtitle: string;
@@ -25,7 +26,7 @@ export default async function ModifySubtitles({
     Key: filename,
   });
 
-  let xmlData: string;
+  let fcpxmlData: string;
 
   try {
     const { Body } = await s3Client.send(command);
@@ -33,27 +34,13 @@ export default async function ModifySubtitles({
       console.error('Impossible de lire le fichier ' + filename);
       notFound();
     }
-    xmlData = await Body.transformToString();
+    fcpxmlData = await Body.transformToString();
   } catch (e) {
     console.error(e);
     notFound();
   }
 
-  const regexVideoTitle = '<media id="[^"]*" name="(?<video_title>[^"]*)"';
-  const matchVideoTitle = xmlData.match(new RegExp(regexVideoTitle));
-  const videoTitle = matchVideoTitle?.groups?.video_title;
-
-  const regexSubtitles =
-    '<text>\n[ ]*<text-style ref="(?<ref>.*)">(?<subtitle>.*)</text-style>\n[ ]*</text>';
-  const matches = xmlData.matchAll(new RegExp(regexSubtitles, 'g'));
-
-  const subtitles: Subtitle[] | undefined = [];
-  for (const match of matches) {
-    const groups = match.groups;
-    if (groups !== undefined && 'ref' in groups && 'subtitle' in groups) {
-      subtitles.push({ ...groups } as Subtitle);
-    }
-  }
+  const [videoTitle, subtitles] = extractNameAndSubtitles(fcpxmlData);
 
   return (
     <div>
@@ -63,7 +50,11 @@ export default async function ModifySubtitles({
       <h2 className='text-center text-xl italic font-thin drop-shadow-sm mb-4'>
         Traduire les sous-titres
       </h2>
-      <DownloadFile filename={filename} subtitles={subtitles} />
+      <TranslateSubtitles
+        filename={filename}
+        videoTitle={videoTitle}
+        subtitles={subtitles}
+      />
     </div>
   );
 }

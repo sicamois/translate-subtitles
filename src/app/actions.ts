@@ -10,6 +10,7 @@ import {
   GetObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { Subtitle } from '@/lib/fcpxmlParser';
 
 export async function uploadFile(
   currentState: {
@@ -50,72 +51,43 @@ export async function uploadFile(
 
   const encryptedFile = encrypt(file.name, process.env.KEY!);
 
-  permanentRedirect(`/modify-subtitles?file=${encryptedFile}`);
+  permanentRedirect(`/translate?file=${encryptedFile}`);
 }
 
 export async function createFile(
-  currentState: { filename: string; url?: string; message: string },
+  currentState: {
+    subtitles: Subtitle[];
+    videoTitle: string;
+    url?: string;
+    message: string;
+  },
   fromData: FormData
 ) {
   const s3Client = new S3Client({ region: 'eu-west-3' });
 
-  const { Body } = await s3Client.send(
-    new GetObjectCommand({
-      Bucket: process.env.AWS_S3_BUCKET_NAME,
-      Key: currentState.filename,
-    })
+  const language = fromData.get('language');
+  const translations = Array.from(fromData.entries()).filter(
+    ([key]) => key !== 'language'
   );
-
-  if (Body === undefined) {
-    return {
-      message: 'Impossible de lire le fichier ' + currentState.filename,
-      filename: currentState.filename,
-    };
-  }
-
-  let xmlData = await Body.transformToString();
-
-  // Change the language of the subtitles
-  // role="SUB ENG.SUB ENG-[0-9]*" -> role="SUB FRE.SUB FRE-[0-9]*"
-  const regex = new RegExp('role="SUB ENG.SUB ENG-[0-9]*"', 'g');
-  xmlData = xmlData.replace(
-    regex,
-    `role="SUB ${fromData.get('language')}.SUB ${fromData.get('language')}-1"`
-  );
-  const regexLanguage = '<languageCode>(?<language>[^<]*)</languageCode>';
-  const matchLanguage = xmlData.match(new RegExp(regexLanguage));
-  const language = matchLanguage?.groups?.language;
-  if (language) {
-    xmlData = xmlData.replace(
-      new RegExp(regexLanguage, 'g'),
-      `<languageCode>${fromData.get('language')}</languageCode>`
+  const srtSubtites = translations.map(([ref, translation], index) => {
+    const subtitle = currentState.subtitles.find(
+      (subtitle) => subtitle.ref === ref
     );
-  }
-
-  // Replace the subtitles in the XML file
-  Array.from(fromData.entries()).forEach(([key, value]) => {
-    const regex = new RegExp(
-      `<text>\n[ ]*<text-style ref="${key}">.*</text-style>\n[ ]*</text>`,
-      'g'
-    );
-    xmlData = xmlData.replace(
-      regex,
-      `<text>\n                            <text-style ref="${key}">${value}</text-style>\n                        </text>`
-    );
+    return `${index + 1}\n${subtitle?.timelineIn} --> ${
+      subtitle?.timelineOut
+    }\n${translation}`;
   });
 
-  const generatedFilename = `generated/${currentState.filename}`.replace(
-    '.fcpxml',
-    '-modified.fcpxml'
-  );
-  console.log('generatedFilename', generatedFilename);
+  const srtData = `${srtSubtites.join('\n\n')}`;
+
+  const generatedFilename = `generated/${currentState.videoTitle} - SUB ${language}.srt`;
 
   try {
     // Put an object into an Amazon S3 bucket.
     const putCommand = new PutObjectCommand({
       Bucket: process.env.AWS_S3_BUCKET_NAME,
       Key: generatedFilename,
-      Body: xmlData,
+      Body: srtData,
     });
     await s3Client.send(putCommand);
 
@@ -127,15 +99,17 @@ export async function createFile(
     const url = await getSignedUrl(s3Client, getCommand, { expiresIn: 600 });
 
     return {
-      filename: generatedFilename,
+      subtitles: currentState.subtitles,
+      videoTitle: currentState.videoTitle,
       url,
       message: 'Le nouveau fichier a été créé avec succès',
     };
   } catch (e) {
     console.error(e);
     return {
+      subtitles: currentState.subtitles,
       message: `Erreur lors de la création du nouveau fichier (${e})`,
-      filename: currentState.filename,
+      videoTitle: currentState.videoTitle,
     };
   }
 }

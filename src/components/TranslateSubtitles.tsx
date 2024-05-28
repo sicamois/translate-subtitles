@@ -7,24 +7,28 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Button } from './ui/button';
 import Spinner from './Spinner';
-import type { Subtitle } from '@/app/modify-subtitles/page';
+import type { Subtitle } from '@/lib/fcpxmlParser';
 import { Card, CardContent, CardTitle } from './ui/card';
 import { Download } from 'lucide-react';
 import Link from 'next/link';
 
-export function DownloadFile({
+export default function TranslateSubtitles({
   filename,
+  videoTitle,
   subtitles,
 }: {
   filename: string;
+  videoTitle: string;
   subtitles: Subtitle[];
 }) {
   const initialState: {
-    filename: string;
+    subtitles: Subtitle[];
+    videoTitle: string;
     url?: string;
     message: string;
   } = {
-    filename,
+    subtitles,
+    videoTitle,
     message: '',
   };
 
@@ -34,7 +38,6 @@ export function DownloadFile({
     const { pending } = useFormStatus();
 
     if (url) {
-      console.log('url', url);
       return (
         <Link
           target='_blank'
@@ -73,32 +76,32 @@ export function DownloadFile({
           id='language'
           name='language'
           className='appearance-none px-4 py-2 bg-muted-foreground text-muted text-xl rounded-md'
-          defaultValue='FR'
+          defaultValue='FRA'
         >
-          <option value='FR'>Français</option>
-          <option value='ES'>Espagnol</option>
-          <option value='AR'>Arabe</option>
+          <option value='FRA'>Français</option>
+          <option value='ESP'>Espagnol</option>
+          <option value='ARA'>Arabe</option>
+          <option value='ITA'>Italien</option>
+          <option value='RUS'>Russe</option>
         </select>
       </Card>
       {subtitles.map((subtitle, index) => (
         <Card key={index} className='flex gap-2 p-2 items-center group'>
-          <CardTitle className='flex gap-1 p-2 text-base font-light shrink-0'>
+          <CardTitle className='flex gap-1 p-2 text-base font-light shrink-0 group-focus-within:text-secondary'>
             <p className='font-medium'>{index + 1}</p>
-            <p>∙</p>
-            <p className='group-focus-within:text-secondary'>{subtitle?.ref}</p>
           </CardTitle>
           <CardContent
             id={`subtitle-${index}`}
             className='text-base bg-muted text-muted-foreground p-2 w-max shrink-0 rounded-md group-focus-within:bg-secondary group-focus-within:text-secondary-foreground transition-colors duration-200 ease-in-out'
           >
-            {subtitle?.subtitle}
+            {subtitle.text}
           </CardContent>
           <p>→</p>
           <Input
             className='bg-muted-foreground text-muted text-base'
-            id={subtitle?.ref}
-            name={subtitle?.ref}
-            defaultValue={subtitle?.subtitle}
+            id={subtitle.ref}
+            name={subtitle.ref}
+            defaultValue={subtitle?.text}
           />
         </Card>
       ))}
