@@ -1,8 +1,12 @@
-import { Card, CardContent, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { DownloadFile } from '@/components/DownloadFile';
 import { decrypt } from '@/lib/utils';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { notFound } from 'next/navigation';
+
+export type Subtitle = {
+  subtitle: string;
+  ref: string;
+};
 
 export default async function ModifySubtitles({
   searchParams,
@@ -16,18 +20,24 @@ export default async function ModifySubtitles({
   }
   const filename = decrypt(encryptedFilename, process.env.KEY!);
   // Read the object.
-  const { Body } = await s3Client.send(
-    new GetObjectCommand({
-      Bucket: process.env.AWS_S3_BUCKET_NAME,
-      Key: filename,
-    })
-  );
+  const command = new GetObjectCommand({
+    Bucket: process.env.AWS_S3_BUCKET_NAME,
+    Key: filename,
+  });
 
-  if (Body === undefined) {
-    throw new Error('Impossible de lire le fichier ' + filename);
+  let xmlData: string;
+
+  try {
+    const { Body } = await s3Client.send(command);
+    if (Body === undefined) {
+      console.error('Impossible de lire le fichier ' + filename);
+      notFound();
+    }
+    xmlData = await Body.transformToString();
+  } catch (e) {
+    console.error(e);
+    notFound();
   }
-
-  const xmlData = await Body.transformToString();
 
   const regexVideoTitle = '<media id="[^"]*" name="(?<video_title>[^"]*)"';
   const matchVideoTitle = xmlData.match(new RegExp(regexVideoTitle));
@@ -37,10 +47,12 @@ export default async function ModifySubtitles({
     '<text>\n[ ]*<text-style ref="(?<ref>.*)">(?<subtitle>.*)</text-style>\n[ ]*</text>';
   const matches = xmlData.matchAll(new RegExp(regexSubtitles, 'g'));
 
-  const subtitles = [];
+  const subtitles: Subtitle[] | undefined = [];
   for (const match of matches) {
     const groups = match.groups;
-    subtitles.push({ ...groups });
+    if (groups !== undefined && 'ref' in groups && 'subtitle' in groups) {
+      subtitles.push({ ...groups } as Subtitle);
+    }
   }
 
   return (
@@ -51,32 +63,7 @@ export default async function ModifySubtitles({
       <h2 className='text-center text-xl italic font-thin drop-shadow-sm mb-4'>
         Traduire les sous-titres
       </h2>
-      <form className='flex flex-col gap-2 p-4'>
-        {subtitles.map((subtitle, index) => (
-          <Card key={index} className='flex gap-2 p-2 items-center group'>
-            <CardTitle className='flex gap-1 p-2 text-base font-light shrink-0'>
-              <p className='font-medium'>{index + 1}</p>
-              <p>∙</p>
-              <p className='group-focus-within:text-secondary'>
-                {subtitle?.ref}
-              </p>
-            </CardTitle>
-            <CardContent
-              id={`subtitle-${index}`}
-              className='text-base bg-muted text-muted-foreground p-2 w-max shrink-0 rounded-md group-focus-within:bg-secondary group-focus-within:text-secondary-foreground transition-colors duration-200 ease-in-out'
-            >
-              {subtitle?.subtitle}
-            </CardContent>
-            <p>→</p>
-            <Input
-              className='bg-muted-foreground text-muted text-base'
-              id={subtitle?.ref}
-              name={subtitle?.ref}
-              defaultValue={subtitle?.subtitle}
-            />
-          </Card>
-        ))}
-      </form>
+      <DownloadFile filename={filename} subtitles={subtitles} />
     </div>
   );
 }

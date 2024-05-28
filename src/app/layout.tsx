@@ -120,7 +120,7 @@ export default function RootLayout({
       >
         <div className='font-sans flex flex-col items-center justify-items-center w-max sm:w-full min-h-screen pb-10'>
           <header className='flex justify-center items-center gap-8 w-full'>
-            <p className='bg-muted p-2 text-4xl font-bold text-muted-foreground text-center w-full'>
+            <p className='bg-muted p-2 text-4xl text-muted-foreground text-center w-full'>
               Translate Subtitles
             </p>
           </header>
