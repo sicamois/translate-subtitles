@@ -1,7 +1,9 @@
+import './globals.css';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
-import './globals.css';
 import { cn } from '@/lib/utils';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const fontSans = localFont({
   src: [
@@ -129,6 +131,8 @@ export default function RootLayout({
           </main>
           <footer className='row-start-3 flex gap-6 flex-wrap items-center justify-center'></footer>
         </div>
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
