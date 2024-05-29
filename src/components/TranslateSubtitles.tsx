@@ -122,16 +122,16 @@ export default function TranslateSubtitles({
         </TableHeader>
         <TableBody>
           {subtitles.map((subtitle, index) => (
-            <TableRow key={index} className='group'>
-              <TableCell className='align-top shrink-0'>
+            <TableRow key={index} className='group py-2'>
+              <TableCell className='align-top shrink-0 py-2'>
                 <p className='py-2'>{index + 1}</p>
               </TableCell>
-              <TableCell className='align-top w-1/2 shrink'>
-                <p className='w-fit p-2 text-base rounded-md group-focus-within:bg-secondary group-focus-within:text-secondary-foreground transition-colors duration-200 ease-in-out'>
+              <TableCell className='align-top w-1/2 shrink py-2'>
+                <p className='w-fit p-2 text-base font-medium rounded-md group-focus-within:bg-secondary group-focus-within:text-secondary-foreground transition-colors duration-100 ease-in-out'>
                   {subtitle.text}
                 </p>
               </TableCell>
-              <TableCell className=' w-1/2 shrink'>
+              <TableCell className=' w-1/2 shrink py-0'>
                 <Textarea
                   className='bg-muted-foreground text-muted text-base'
                   id={subtitle.ref}
