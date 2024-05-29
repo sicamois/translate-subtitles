@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { createFile } from '@/app/actions';
 import { Label } from './ui/label';
@@ -48,6 +48,7 @@ export default function TranslateSubtitles({
     ITA: 'Italien',
     RUS: 'Russe',
   };
+  const [language, setLanguage] = useState<keyof typeof languages>('FRA');
 
   function SubmitButton({ url }: { url?: string }) {
     const { pending } = useFormStatus();
@@ -92,6 +93,9 @@ export default function TranslateSubtitles({
           name='language'
           className='appearance-none px-4 py-2 bg-muted-foreground text-muted text-xl rounded-md'
           defaultValue='FRA'
+          onChange={(e) =>
+            setLanguage(e.target.value as keyof typeof languages)
+          }
         >
           {Object.entries(languages).map(([key, value]) => (
             <option key={key} value={key}>
@@ -105,7 +109,7 @@ export default function TranslateSubtitles({
           <TableRow>
             <TableHead>#</TableHead>
             <TableHead>Sous-titre</TableHead>
-            <TableHead>{languages['FRA']}</TableHead>
+            <TableHead>{languages[language]}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
