@@ -29,18 +29,6 @@ export default function TranslateSubtitles({
   videoTitle: string;
   subtitles: Subtitle[];
 }) {
-  const initialState: {
-    subtitles: Subtitle[];
-    videoTitle: string;
-    url?: string;
-    message: string;
-  } = {
-    subtitles,
-    videoTitle,
-    message: '',
-  };
-
-  const [state, formAction] = useActionState(createFile, initialState);
   const languages = {
     FRA: 'Français',
     ESP: 'Espagnol',
@@ -49,6 +37,26 @@ export default function TranslateSubtitles({
     RUS: 'Russe',
   };
   const [language, setLanguage] = useState<keyof typeof languages>('FRA');
+
+  const translations = subtitles.map((subtitle) => {
+    return subtitle.text;
+  });
+
+  const initialState: {
+    subtitles: Subtitle[];
+    videoTitle: string;
+    url?: string;
+    message: string;
+  } = {
+    subtitles: subtitles.map((subtitle, index) => ({
+      ...subtitle,
+      text: translations[index],
+    })),
+    videoTitle,
+    message: '',
+  };
+
+  const [state, formAction] = useActionState(createFile, initialState);
 
   function SubmitButton({ url }: { url?: string }) {
     const { pending } = useFormStatus();
@@ -128,7 +136,7 @@ export default function TranslateSubtitles({
                   className='bg-muted-foreground text-muted text-base'
                   id={subtitle.ref}
                   name={subtitle.ref}
-                  defaultValue={subtitle.text}
+                  defaultValue={translations[index]}
                   rows={Math.ceil(subtitle.text.length / 60)}
                   required
                 />
