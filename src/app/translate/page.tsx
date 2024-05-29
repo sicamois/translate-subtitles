@@ -43,7 +43,7 @@ export default async function ModifySubtitles({
   const [videoTitle, subtitles] = extractNameAndSubtitles(fcpxmlData);
 
   return (
-    <div>
+    <div className='w-full'>
       <h1 className='text-center text-4xl font-thin drop-shadow-sm mb-4'>
         {videoTitle}
       </h1>
