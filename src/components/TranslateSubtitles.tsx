@@ -1,8 +1,8 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { use, useActionState, useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { createFile } from '@/app/actions';
+import { createFile, translate } from '@/app/actions';
 import { Label } from './ui/label';
 import { Button } from './ui/button';
 import Spinner from './Spinner';
@@ -20,27 +20,28 @@ import { Download } from 'lucide-react';
 import Link from 'next/link';
 import { Textarea } from './ui/textarea';
 
+const languages = {
+  FRA: 'Français',
+  ESP: 'Espagnol',
+  ARA: 'Arabe',
+  ITA: 'Italien',
+  RUS: 'Russe',
+};
+
+export type AcceptedLanguages = keyof typeof languages;
+
 export default function TranslateSubtitles({
   filename,
   videoTitle,
   subtitles,
+  translations,
 }: {
   filename: string;
   videoTitle: string;
   subtitles: Subtitle[];
+  translations: string[];
 }) {
-  const languages = {
-    FRA: 'Français',
-    ESP: 'Espagnol',
-    ARA: 'Arabe',
-    ITA: 'Italien',
-    RUS: 'Russe',
-  };
-  const [language, setLanguage] = useState<keyof typeof languages>('FRA');
-
-  const translations = subtitles.map((subtitle) => {
-    return subtitle.text;
-  });
+  const [language, setLanguage] = useState<AcceptedLanguages>('FRA');
 
   const initialState: {
     subtitles: Subtitle[];
@@ -56,7 +57,19 @@ export default function TranslateSubtitles({
     message: '',
   };
 
+  const initialTranslateState: {
+    translations: string[];
+    message: string;
+  } = {
+    translations,
+    message: '',
+  };
+
   const [state, formAction] = useActionState(createFile, initialState);
+  const [translationState, translateAction] = useActionState(
+    translate,
+    initialTranslateState
+  );
 
   function SubmitButton({ url }: { url?: string }) {
     const { pending } = useFormStatus();
@@ -111,6 +124,9 @@ export default function TranslateSubtitles({
             </option>
           ))}
         </select>
+        <Button formAction={translateAction} className='text-lg'>
+          Traduire
+        </Button>
       </Card>
       <Table className='w-full rounded-t-md overflow-hidden'>
         <TableHeader className='text-lg font-medium bg-primary text-primary-foreground'>
@@ -136,7 +152,7 @@ export default function TranslateSubtitles({
                   className='bg-muted-foreground text-muted text-base'
                   id={subtitle.ref}
                   name={subtitle.ref}
-                  defaultValue={translations[index]}
+                  defaultValue={translationState.translations[index]}
                   rows={Math.ceil(subtitle.text.length / 60)}
                   required
                 />

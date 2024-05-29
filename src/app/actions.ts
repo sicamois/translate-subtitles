@@ -11,6 +11,8 @@ import {
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Subtitle } from '@/lib/fcpxmlParser';
+import { TargetLanguageCode, Translator } from 'deepl-node';
+import { AcceptedLanguages } from '@/components/TranslateSubtitles';
 
 export async function uploadFile(
   currentState: {
@@ -112,4 +114,34 @@ export async function createFile(
       videoTitle: currentState.videoTitle,
     };
   }
+}
+
+export async function translate(
+  currentState: {
+    translations: string[];
+    message: string;
+  },
+  fromData: FormData
+) {
+  if (!process.env.DEEPL_API_KEY) {
+    return {
+      translations: currentState.translations,
+      message: 'Veuillez configurer une clé API DeepL',
+    };
+  }
+  const translator = new Translator(process.env.DEEPL_API_KEY);
+  const targetLanguage = fromData
+    .get('language')
+    ?.slice(0, 2) as TargetLanguageCode;
+  const newTranslations = await translator.translateText(
+    currentState.translations,
+    null,
+    targetLanguage,
+    { preserveFormatting: true }
+  );
+
+  return {
+    translations: newTranslations.map((translation) => translation.text),
+    message: 'Les sous-titres ont été traduits avec succès',
+  };
 }
