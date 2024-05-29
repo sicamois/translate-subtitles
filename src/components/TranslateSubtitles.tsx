@@ -125,11 +125,11 @@ export default function TranslateSubtitles({
               </TableCell>
               <TableCell className=' w-1/2 shrink'>
                 <Textarea
-                  className='min-h-fit bg-muted-foreground text-muted text-base'
+                  className='bg-muted-foreground text-muted text-base'
                   id={subtitle.ref}
                   name={subtitle.ref}
-                  rows={subtitle.text.length > 55 ? 2 : 1}
                   defaultValue={subtitle.text}
+                  rows={Math.ceil(subtitle.text.length / 60)}
                   required
                 />
               </TableCell>
