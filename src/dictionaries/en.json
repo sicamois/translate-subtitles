@@ -2,7 +2,7 @@
   "file": {
     "uploading": "Uploading file...",
     "upload": "Upload",
-    "selectFile": "Select a Final Cut Pro <code>.fcpxml</code> file containing subtitles",
+    "selectFile": "Select a Final Cut Pro .fcpxml file containing subtitles",
     "createFile": "Create file",
     "creatingFile": "Creating file...",
     "download": "Download file"
