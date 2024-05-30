@@ -30,7 +30,7 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
         aria-disabled={pending}
       >
         {pending && <Spinner />}
-        {pending ? labelsDict.file.upload : labelsDict.file.uploading}
+        {pending ? labelsDict.file.uploading : labelsDict.file.upload}
       </Button>
     );
   }

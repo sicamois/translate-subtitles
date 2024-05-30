@@ -1,6 +1,6 @@
 {
   "file": {
-    "uploading": "Uploadinf file...",
+    "uploading": "Uploading file...",
     "upload": "Upload",
     "selectFile": "Select a Final Cut Pro <code>.fcpxml</code> file containing subtitles",
     "createFile": "Create file",
