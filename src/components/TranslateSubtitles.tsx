@@ -157,8 +157,11 @@ export default function TranslateSubtitles({
             <TableHead className='w-[24rem]'>
               {labelsDict.translate.subtitle}
             </TableHead>
-            <TableHead className='w-[24rem] rounded-e-md'>
-              {languages[language]}
+            <TableHead className='w-[24rem] rounded-e-md flex flex-col'>
+              <p>{languages[language]}</p>
+              <p className='italic text-sm -mt-1'>
+                {labelsDict.translate.warningLength}
+              </p>
             </TableHead>
           </TableRow>
         </TableHeader>

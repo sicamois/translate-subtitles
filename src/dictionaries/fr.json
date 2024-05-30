@@ -11,6 +11,7 @@
     "aiAssistant": "Aide à la traducation",
     "translateSubtitles": "Traduire les sous-titres",
     "language": "Langue",
-    "subtitle": "Sous-titre"
+    "subtitle": "Sous-titre",
+    "warningLength": "rouge : traducation est plus longue de 10% que l'original"
   }
 }
