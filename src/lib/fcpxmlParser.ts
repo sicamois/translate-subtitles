@@ -8,6 +8,55 @@ export type Subtitle = {
   text: string;
 };
 
+type FCPElement = {
+  '@_name': string;
+  '@_offset': string;
+  '@_start': string;
+  '@_duration': string;
+};
+
+type FCPRef = {
+  '@_ref': string;
+};
+
+type FCPTitle = FCPElement &
+  FCPRef & {
+    '@_lane': string;
+    '@_role': string;
+    param: Record<string, string>;
+    text: {
+      'text-style': {
+        '@_ref': string;
+        '#text': string;
+      };
+    };
+    'text-style-def': {
+      '@_id': string;
+      'text-style': Record<string, string>;
+    }[];
+  };
+
+type FCPAssetClip = FCPElement &
+  FCPRef & {
+    '@_format': string;
+    '@_tcFormat': string;
+    '@_audioRole': string;
+    '@_audioStart'?: string;
+    '@_audioDuration'?: string;
+    title?: FCPTitle;
+    clip?: any;
+    keyword?: any;
+    'adjust-volume'?: any;
+    'adjust-transform'?: any;
+    'audio-channel-source'?: any;
+  };
+
+type FCPGap = FCPElement & {
+  spine?: any[];
+  'asset-clip': FCPAssetClip[];
+  title?: FCPTitle[];
+};
+
 type FCPData = {
   fcpxml: {
     resources: {
@@ -18,6 +67,7 @@ type FCPData = {
     };
     library: {
       '@_location': string;
+      '@_version': string;
       event: {
         '@_name': string;
         '@_uid': string;
@@ -28,41 +78,15 @@ type FCPData = {
           '@_modDate': string;
           sequence: {
             spine: {
-              gap: {
-                // Forcer Array
-                '@_name': string;
-                '@_start': string;
-                '@_offset': string;
-                '@_duration': string;
-                spine: any[];
-                'asset-clip': any[];
-                title: {
-                  '@_ref': string;
-                  '@_lane': string;
-                  '@_offset': string;
-                  '@_name': string;
-                  '@_start': string;
-                  '@_duration': string;
-                  '@_role': string;
-                  param: Record<string, string>;
-                  text: {
-                    'text-style': {
-                      '@_ref': string;
-                      '#text': string;
-                    };
-                  };
-                  'text-style-def': {
-                    '@_id': string;
-                    'text-style': Record<string, string>;
-                  }[];
-                }[];
-              };
+              gap: FCPGap[];
+              'asset-clip'?: FCPAssetClip[];
+              transition: any;
+              video: any;
             };
           };
         };
-        'smart-collection': any[];
       };
-      '@_version': string;
+      'smart-collection': any;
     };
   };
 };
@@ -109,26 +133,57 @@ function frameStringtoTimingString(
 export function extractNameAndSubtitles(
   fcpxmlData: string
 ): [string, Subtitle[]] {
+  const alwaysArray = ['gap', 'asset-clip'];
+
   const options = {
     ignoreAttributes: false,
     alwaysCreateTextNode: true,
     ignoreDeclaration: true,
     ignorePiTags: true,
     // parseAttributeValue: true
+    isArray: (
+      name: string,
+      jpath: string,
+      isLeafNode: boolean,
+      isAttribute: boolean
+    ) => {
+      if (alwaysArray.indexOf(name) !== -1) return true;
+      return false;
+    },
   };
 
   const parser = new XMLParser(options);
   const fcpData = parser.parse(fcpxmlData) as FCPData;
 
-  const videoTitle = fcpData.fcpxml.library.event['@_name'];
+  const videoTitle = fcpData.fcpxml.library.event.project['@_name'];
 
-  const initialOffset =
-    fcpData.fcpxml.library.event.project.sequence.spine.gap['@_start'];
-  const titles = fcpData.fcpxml.library.event.project.sequence.spine.gap.title;
+  const gapTitles = fcpData.fcpxml.library.event.project.sequence.spine.gap
+    .filter((gap) => gap.title !== undefined)
+    .map((gap) => gap.title)
+    .flat()
+    .filter(
+      (title) => title !== undefined && title['@_role'] === 'SUB ENG.SUB ENG-1'
+    ) as FCPTitle[];
+
+  const assetClips =
+    fcpData.fcpxml.library.event.project.sequence.spine['asset-clip'];
+  const assetClipTitles =
+    assetClips === undefined
+      ? []
+      : (assetClips
+          .filter((assetClip) => assetClip.title !== undefined)
+          .map((assetClip) => assetClip.title)
+          .flat() as FCPTitle[]);
+
+  const titles = [...gapTitles, ...assetClipTitles];
+
+  const initialOffset = '0s';
+  // fcpData.fcpxml.library.event.project.sequence.spine.gap['@_start'];
+  // const titles = fcpData.fcpxml.library.event.project.sequence.spine.gap.;
 
   const subtitles: Subtitle[] = [];
   for (const title of titles) {
-    if (title['@_role'] === 'SUB ENG.SUB ENG-1') {
+    if (title.text['text-style'] !== undefined) {
       subtitles.push({
         ref: title['@_ref'],
         timelineIn: frameStringtoTimingString(title['@_offset'], initialOffset),
