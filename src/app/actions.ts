@@ -12,8 +12,6 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Subtitle } from '@/lib/fcpxmlParser';
 import { TargetLanguageCode, Translator } from 'deepl-node';
-import { AcceptedLanguages } from '@/components/TranslateSubtitles';
-import { SuppportedLocale } from './dictionaries';
 
 export async function uploadFile(
   currentState: {

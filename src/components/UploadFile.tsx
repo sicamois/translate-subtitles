@@ -7,7 +7,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Button } from './ui/button';
 import Spinner from './Spinner';
-import { LabelsDictionary, SuppportedLocale } from '@/app/dictionaries';
+import { LabelsDictionary } from '@/app/dictionaries';
 
 export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
   const initialState: {

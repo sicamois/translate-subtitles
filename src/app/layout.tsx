@@ -122,7 +122,6 @@ export default async function RootLayout({
   children: React.ReactNode;
   params: { lang: SuppportedLocale };
 }>) {
-  console.log('params', params);
   return (
     <html lang={params.lang}>
       <body

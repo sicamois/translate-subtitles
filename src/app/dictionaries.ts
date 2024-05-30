@@ -22,7 +22,6 @@ export type SuppportedLocale = keyof typeof dictionaries;
 export type LabelsDictionary = Record<string, Record<string, string>>;
 
 export const getDictionary = async (locale?: SuppportedLocale) => {
-  console.log('locale', locale);
   // @ts-expect-error : we will be typing this later...
   return dictionaries[locale ?? 'en']() as LabelsDictionary;
 };

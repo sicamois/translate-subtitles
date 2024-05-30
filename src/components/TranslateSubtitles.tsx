@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useActionState, useState } from 'react';
+import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { createFile, translate } from '@/app/actions';
 import { Label } from './ui/label';
@@ -18,14 +18,14 @@ import {
 import { Download, Languages } from 'lucide-react';
 import Link from 'next/link';
 import { Textarea } from './ui/textarea';
-import { LabelsDictionary, SuppportedLocale } from '@/app/dictionaries';
+import { LabelsDictionary } from '@/app/dictionaries';
 
 const languages = {
   FRA: 'Français',
-  ESP: 'Espagnol',
-  ARA: 'Arabe',
-  ITA: 'Italien',
-  RUS: 'Russe',
+  ESP: 'Español',
+  ARA: 'Arabic',
+  ITA: 'Italiano',
+  RUS: 'Russkiy',
 };
 
 export type AcceptedLanguages = keyof typeof languages;
@@ -142,32 +142,36 @@ export default function TranslateSubtitles({
           </Button>
         </div>
       </div>
-      <Table className='w-full rounded-t-md overflow-hidden'>
+      <Table className='rounded-md overflow-hidden'>
         <TableHeader className='text-lg font-medium bg-primary text-primary-foreground'>
           <TableRow>
             <TableHead>#</TableHead>
-            <TableHead>{labelsDict.translate.subtitle}</TableHead>
-            <TableHead>{languages[language]}</TableHead>
+            <TableHead className='w-[45em]'>
+              {labelsDict.translate.subtitle}
+            </TableHead>
+            <TableHead className='w-[45rem]'>{languages[language]}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {subtitles.map((subtitle, index) => (
             <TableRow key={index} className='group py-2'>
-              <TableCell className='align-top shrink-0 py-2'>
+              <TableCell className='align-top py-2'>
                 <p className='py-2'>{index + 1}</p>
               </TableCell>
-              <TableCell className='align-top w-1/2 shrink py-2'>
-                <p className='w-fit p-2 text-base font-medium rounded-md group-focus-within:bg-secondary group-focus-within:text-secondary-foreground transition-colors duration-100 ease-in-out'>
+              <TableCell className='align-top py-2'>
+                <p className='p-2 text-base font-medium rounded-md group-focus-within:bg-secondary group-focus-within:text-secondary-foreground transition-colors duration-100 ease-in-out'>
                   {subtitle.text}
                 </p>
               </TableCell>
-              <TableCell className=' w-1/2 shrink py-0'>
+              <TableCell className='w-[45em]py-1'>
                 <Textarea
                   className='bg-muted-foreground text-muted text-base'
                   id={subtitle.ref}
                   name={subtitle.ref}
                   defaultValue={translationState.translations[index]}
-                  rows={Math.ceil(subtitle.text.length / 60)}
+                  rows={Math.ceil(
+                    subtitle.text.replace(/'\.|,'/g, '').length / 40
+                  )}
                   required
                 />
               </TableCell>
