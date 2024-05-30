@@ -1,0 +1,16 @@
+{
+  "file": {
+    "uploading": "Téléchargement en cours...",
+    "upload": "Télécharger",
+    "selectFile": "Sélectionner le fichier Final Cut Pro <code>.fcpxml</code> contenant les sous-titres",
+    "createFile": "Créer le nouveau fichier",
+    "creatingFile": "Création en cours...",
+    "download": "Télécharger le fichier modifié"
+  },
+  "translate": {
+    "aiAssistant": "Assistant AI",
+    "translateSubtitles": "Traduire les sous-titres",
+    "language": "Langue",
+    "subtitle": "Sous-titre"
+  }
+}

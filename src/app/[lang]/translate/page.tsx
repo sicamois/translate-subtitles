@@ -3,6 +3,7 @@ import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { notFound } from 'next/navigation';
 import { extractNameAndSubtitles } from '@/lib/fcpxmlParser';
 import TranslateSubtitles from '@/components/TranslateSubtitles';
+import { SuppportedLocale, getDictionary } from '@/app/dictionaries';
 
 export type Subtitle = {
   subtitle: string;
@@ -11,9 +12,13 @@ export type Subtitle = {
 
 export default async function ModifySubtitles({
   searchParams,
+  params: { lang },
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
+  params: { lang: SuppportedLocale };
 }) {
+  const labelsDict = await getDictionary(lang);
+
   const s3Client = new S3Client({ region: 'eu-west-3' });
   const encryptedFilename = searchParams.file;
   if (!encryptedFilename || typeof encryptedFilename !== 'string') {
@@ -52,13 +57,14 @@ export default async function ModifySubtitles({
         {videoTitle}
       </h1>
       <h2 className='text-center text-xl italic font-thin drop-shadow-sm mb-4'>
-        Traduire les sous-titres
+        {labelsDict.translate.translateSubtitles}
       </h2>
       <TranslateSubtitles
         filename={filename}
         videoTitle={videoTitle}
         subtitles={subtitles}
         translations={translations}
+        labelsDict={labelsDict}
       />
     </div>
   );

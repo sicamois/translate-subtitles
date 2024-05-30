@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import { permanentRedirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { encrypt } from '@/lib/utils';
 import {
   S3Client,
@@ -13,6 +13,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Subtitle } from '@/lib/fcpxmlParser';
 import { TargetLanguageCode, Translator } from 'deepl-node';
 import { AcceptedLanguages } from '@/components/TranslateSubtitles';
+import { SuppportedLocale } from './dictionaries';
 
 export async function uploadFile(
   currentState: {
@@ -30,7 +31,9 @@ export async function uploadFile(
   });
 
   if (!parse.success) {
-    return { message: 'Erreur lors de la récupération du fichier' };
+    return {
+      message: 'Erreur lors de la récupération du fichier',
+    };
   }
 
   const file = parse.data.file;
@@ -48,12 +51,14 @@ export async function uploadFile(
     s3output = await s3Client.send(command);
   } catch (e) {
     console.error(e);
-    return { message: 'Erreur lors du téléchargement du fichier' };
+    return {
+      message: 'Erreur lors du téléchargement du fichier',
+    };
   }
 
   const encryptedFile = encrypt(file.name, process.env.KEY!);
 
-  permanentRedirect(`/translate?file=${encryptedFile}`);
+  redirect(`/translate?file=${encryptedFile}`);
 }
 
 export async function createFile(

@@ -18,6 +18,7 @@ import {
 import { Download, Languages } from 'lucide-react';
 import Link from 'next/link';
 import { Textarea } from './ui/textarea';
+import { LabelsDictionary, SuppportedLocale } from '@/app/dictionaries';
 
 const languages = {
   FRA: 'Français',
@@ -34,11 +35,13 @@ export default function TranslateSubtitles({
   videoTitle,
   subtitles,
   translations,
+  labelsDict,
 }: {
   filename: string;
   videoTitle: string;
   subtitles: Subtitle[];
   translations: string[];
+  labelsDict: LabelsDictionary;
 }) {
   const [language, setLanguage] = useState<AcceptedLanguages>('FRA');
 
@@ -83,7 +86,7 @@ export default function TranslateSubtitles({
           className='flex gap-2 items-center justify-center mx-auto mt-8  p-2 text-lg'
         >
           <Download size={24} />
-          <span>Télécharger le fichier modifié</span>
+          <span>{labelsDict.file.download}</span>
         </Link>
       );
     }
@@ -97,7 +100,7 @@ export default function TranslateSubtitles({
         aria-disabled={pending}
       >
         {pending && <Spinner />}
-        {pending ? 'Création en cours...' : 'Créer le nouveau fichier'}
+        {pending ? labelsDict.file.creatingFile : labelsDict.file.createFile}
       </Button>
     );
   }
@@ -108,7 +111,7 @@ export default function TranslateSubtitles({
         <div className='flex justify-evenly w-1/2'>
           <div className='flex gap-2 items-center'>
             <Label htmlFor='language' className='text-xl font-light'>
-              Langue
+              {labelsDict.translate.language}
             </Label>
             <select
               id='language'
@@ -132,7 +135,9 @@ export default function TranslateSubtitles({
           >
             <div className='flex gap-1 items-center'>
               <Languages className='h-5 w-5' />
-              <p className='font-medium drop-shadow'>Traduire</p>
+              <p className='font-medium drop-shadow'>
+                {labelsDict.translate.aiAssistant}
+              </p>
             </div>
           </Button>
         </div>
@@ -141,7 +146,7 @@ export default function TranslateSubtitles({
         <TableHeader className='text-lg font-medium bg-primary text-primary-foreground'>
           <TableRow>
             <TableHead>#</TableHead>
-            <TableHead>Sous-titre</TableHead>
+            <TableHead>{labelsDict.translate.subtitle}</TableHead>
             <TableHead>{languages[language]}</TableHead>
           </TableRow>
         </TableHeader>

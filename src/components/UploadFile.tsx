@@ -7,14 +7,15 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Button } from './ui/button';
 import Spinner from './Spinner';
+import { LabelsDictionary, SuppportedLocale } from '@/app/dictionaries';
 
-const initialState: {
-  message: string;
-} = {
-  message: '',
-};
+export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
+  const initialState: {
+    message: string;
+  } = {
+    message: '',
+  };
 
-export function UploadFile() {
   const [state, formAction] = useActionState(uploadFile, initialState);
 
   function SubmitButton() {
@@ -29,7 +30,7 @@ export function UploadFile() {
         aria-disabled={pending}
       >
         {pending && <Spinner />}
-        {pending ? 'Téléchargement en cours...' : 'Télécharger'}
+        {pending ? labelsDict.file.upload : labelsDict.file.uploading}
       </Button>
     );
   }
@@ -40,8 +41,7 @@ export function UploadFile() {
       action={formAction}
     >
       <Label htmlFor='file' className='text-center'>
-        Sélectionner le fichier Final Cut Pro <code>.fcpxml</code> contenant les
-        sous-titres{' '}
+        {labelsDict.file.selectFile}
       </Label>
       <Input
         className='text-lg'

@@ -1,0 +1,16 @@
+{
+  "file": {
+    "uploading": "Uploadinf file...",
+    "upload": "Upload",
+    "selectFile": "Select a Final Cut Pro <code>.fcpxml</code> file containing subtitles",
+    "createFile": "Create file",
+    "creatingFile": "Creating file...",
+    "download": "Download file"
+  },
+  "translate": {
+    "aiAssistant": "AI assistant",
+    "translateSubtitles": "Translate subtitles",
+    "language": "Language",
+    "subtitle": "Subtitle"
+  }
+}

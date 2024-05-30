@@ -4,6 +4,14 @@ import localFont from 'next/font/local';
 import { cn } from '@/lib/utils';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { supportedLocales } from './dictionaries';
+import type { SuppportedLocale } from './dictionaries';
+
+export async function generateStaticParams() {
+  return supportedLocales.map((lang) => {
+    return { lang };
+  });
+}
 
 const fontSans = localFont({
   src: [
@@ -107,13 +115,16 @@ export const metadata: Metadata = {
   description: 'Translate your subtitles from Final Cut Pro',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params: { lang: SuppportedLocale };
 }>) {
+  console.log('params', params);
   return (
-    <html lang='fr'>
+    <html lang={params.lang}>
       <body
         className={cn(
           'min-h-screen bg-background font-sans antialiased',
