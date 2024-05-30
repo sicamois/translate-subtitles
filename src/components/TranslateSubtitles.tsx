@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { FormEvent, useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { createFile, translate } from '@/app/actions';
 import { Label } from './ui/label';
@@ -19,6 +19,7 @@ import { Download, Languages } from 'lucide-react';
 import Link from 'next/link';
 import { Textarea } from './ui/textarea';
 import { LabelsDictionary } from '@/app/dictionaries';
+import { cn } from '@/lib/utils';
 
 const languages = {
   FRA: 'Français',
@@ -105,6 +106,13 @@ export default function TranslateSubtitles({
     );
   }
 
+  function autoresize(event: FormEvent<HTMLTextAreaElement>) {
+    const self = event.currentTarget as HTMLTextAreaElement;
+    event.bubbles = true;
+    self.style.height = '0px';
+    self.style.height = self.scrollHeight + 'px';
+  }
+
   return (
     <form className='w-full flex flex-col gap-2 p-4' action={formAction}>
       <div className='relative flex gap-8 p-2 items-center justify-end mb-4'>
@@ -142,36 +150,55 @@ export default function TranslateSubtitles({
           </Button>
         </div>
       </div>
-      <Table className='rounded-md overflow-hidden'>
+      <Table className='overflow-hidden'>
         <TableHeader className='text-lg font-medium bg-primary text-primary-foreground'>
           <TableRow>
-            <TableHead>#</TableHead>
-            <TableHead className='w-[45em]'>
+            <TableHead className='rounded-s-md'>#</TableHead>
+            <TableHead className='w-[24rem]'>
               {labelsDict.translate.subtitle}
             </TableHead>
-            <TableHead className='w-[45rem]'>{languages[language]}</TableHead>
+            <TableHead className='w-[24rem] rounded-e-md'>
+              {languages[language]}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {subtitles.map((subtitle, index) => (
             <TableRow key={index} className='group py-2'>
-              <TableCell className='align-top py-2'>
-                <p className='py-2'>{index + 1}</p>
+              <TableCell className='w-6 align-center py-2'>
+                <p>{index + 1}</p>
               </TableCell>
-              <TableCell className='align-top py-2'>
+              <TableCell className='align-center'>
                 <p className='p-2 text-base font-medium rounded-md group-focus-within:bg-secondary group-focus-within:text-secondary-foreground transition-colors duration-100 ease-in-out'>
                   {subtitle.text}
                 </p>
               </TableCell>
               <TableCell className='w-[45em]py-1'>
                 <Textarea
-                  className='bg-muted-foreground text-muted text-base'
+                  className={cn(
+                    'bg-muted-foreground text-base',
+                    translationState.translations[index].length >
+                      1.1 * subtitle.text.length
+                      ? 'text-red-500'
+                      : 'text-muted'
+                  )}
                   id={subtitle.ref}
                   name={subtitle.ref}
                   defaultValue={translationState.translations[index]}
                   rows={Math.ceil(
-                    subtitle.text.replace(/'\.|,'/g, '').length / 40
+                    translationState.translations[index].replace(/'\.|,'/g, '')
+                      .length / 55
                   )}
+                  onInput={(event) => {
+                    const self = event.currentTarget as HTMLTextAreaElement;
+                    const value = self.value;
+                    if (value.length > 1.1 * subtitle.text.length) {
+                      self.classList.add('text-red-500');
+                    } else {
+                      self.classList.remove('text-red-500');
+                    }
+                    autoresize(event);
+                  }}
                   required
                 />
               </TableCell>

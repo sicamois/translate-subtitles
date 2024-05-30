@@ -5,8 +5,15 @@ import { cn } from '@/lib/utils';
 export interface TextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
 
+function autoresize(event: React.ChangeEvent<HTMLTextAreaElement>) {
+  const self = event.currentTarget as HTMLTextAreaElement;
+  event.bubbles = true;
+  self.style.height = '0px';
+  self.style.height = self.scrollHeight + 'px';
+}
+
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, rows, ...props }, ref) => {
+  ({ className, rows, onInput, ...props }, ref) => {
     return (
       <textarea
         className={cn(
@@ -15,12 +22,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         )}
         ref={ref}
         rows={rows ? rows : 1}
-        onInput={(e) => {
-          const self = e.currentTarget as HTMLTextAreaElement;
-          e.bubbles = true;
-          self.style.height = '0px';
-          self.style.height = self.scrollHeight + 'px';
-        }}
+        onInput={onInput ? onInput : autoresize}
         {...props}
       />
     );
