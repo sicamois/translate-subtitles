@@ -8,10 +8,10 @@
     "download": "Télécharger le fichier modifié"
   },
   "translate": {
-    "aiAssistant": "Aide à la traducation",
+    "aiAssistant": "Aide à la traduction",
     "translateSubtitles": "Traduire les sous-titres",
     "language": "Langue",
     "subtitle": "Sous-titre",
-    "warningLength": "rouge : traducation est plus longue de 10% que l'original"
+    "warningLength": "→ rouge : traduction > 110% de l'original"
   }
 }
