@@ -8,63 +8,163 @@ export type Subtitle = {
   text: string;
 };
 
-type FCPElement = {
-  '@_name': string;
-  '@_offset': string;
-  '@_start': string;
-  '@_duration': string;
+type FCPTimingAttributes = {
+  '@_offset'?: string;
+  '@_start'?: string;
+  '@_duration'?: string;
 };
 
-type FCPRef = {
-  '@_ref': string;
+type FCPTimelineAttributes = {
+  '@_format': string;
+  '@_tcStart'?: string;
+  '@_tcFormat': string;
+  '@_audioLayout'?: string;
+  '@_audioRate'?: string;
 };
 
-type FCPTitle = FCPElement &
-  FCPRef & {
-    '@_lane': string;
-    '@_role': string;
-    param: Record<string, string>;
-    text: {
-      'text-style': {
-        '@_ref': string;
-        '#text': string;
-      };
-    };
-    'text-style-def': {
-      '@_id': string;
-      'text-style': Record<string, string>;
+type FCPAnchorableAttributes = {
+  '@_lane'?: string;
+};
+
+type FCPElementAttributes = FCPTimingAttributes & {
+  '@_name'?: string;
+  '@_enabled'?: string;
+};
+
+type FCPTextAttributes = {
+  '@_display-style'?: string;
+  '@_roll-up-height'?: string;
+  '@_position'?: string;
+  '@_placement'?: string;
+  '@_alignment'?: string;
+};
+
+type FCPTextStyleAttributes = {
+  '@_font'?: string;
+  '@fontFace'?: string;
+  '@_fontSize'?: string;
+  '@_fontColor'?: string;
+  '@_backgroundColor'?: string;
+  '@_bold'?: string;
+  '@_italic'?: string;
+  '@_strokeColor'?: string;
+  '@_strokeWidth'?: string;
+  '@_baseline'?: string;
+  '@_shadowColor'?: string;
+  '@_shadowOffset'?: string;
+  '@_shadowBlurRadius'?: string;
+  '@_kerning'?: string;
+  '@_alignment'?: string;
+  '@_lineSpacing'?: string;
+  '@_tabStops'?: string;
+  '@_baselineOffset'?: string;
+  '@_underline'?: string;
+};
+
+type FCPAssetClipAttributes = FCPElementAttributes &
+  FCPTimelineAttributes & {
+    '@_srcEnable'?: string;
+    '@_audioStart'?: string;
+    '@_audioDuration'?: string;
+    '@_modDate'?: string;
+    '@_videoRole'?: string;
+  };
+
+// StoryElement
+type FCPClipItems = {
+  gap?: FCPGap[];
+  clip?: FCPClip[];
+  'asset-clip'?: FCPAssetClip[];
+  title?: FCPTitle[];
+  audio?: any;
+  video?: any;
+  'mc-clip'?: any;
+  'ref-clip'?: any;
+  'sync-clip'?: any;
+  audition?: any;
+};
+
+type FCPAnchorItems = {
+  spine?: FCPSpine[];
+  clip?: FCPClip[];
+  'asset-clip'?: FCPAssetClip[];
+  title?: FCPTitle[];
+  audio?: any;
+  video?: any;
+  'mc-clip'?: any;
+  'ref-clip'?: any;
+  'sync-clip'?: any;
+  audition?: any;
+  caption?: any;
+};
+
+type FCPMarkerItems = {
+  marker: any;
+  'chapter-marker': any;
+  rating: any;
+  keyword: any;
+  'analysis-marker': any;
+};
+
+type FCPClip = FCPAssetClipAttributes &
+  FCPClipItems &
+  FCPMarkerItems & {
+    '@_name': string;
+    spine?: FCPSpine[];
+    caption?: any;
+    'audio-channel-source'?: {
+      '@_srcCh': string;
+      '@_outCh': string;
     }[];
   };
 
-type FCPAssetClip = FCPElement &
-  FCPRef & {
-    '@_format': string;
-    '@_tcFormat': string;
-    '@_audioRole': string;
-    '@_audioStart'?: string;
-    '@_audioDuration'?: string;
-    title?: FCPTitle;
-    clip?: any;
-    keyword?: any;
-    'adjust-volume'?: any;
-    'adjust-transform'?: any;
+type FCPAssetClip = FCPAssetClipAttributes &
+  FCPAnchorItems &
+  FCPMarkerItems & {
+    '@_ref': string;
     'audio-channel-source'?: any;
+    'filter-audio'?: any;
+    metadata?: any;
   };
 
-type FCPGap = FCPElement & {
-  spine?: any[];
-  'asset-clip': FCPAssetClip[];
-  title?: FCPTitle[];
-};
+type FCPSpine = FCPAnchorableAttributes &
+  FCPClipItems & {
+    '@_name': string;
+    '@format': string;
+    transition?: any;
+  };
 
-type FCPData = {
+type FCPGap = FCPElementAttributes &
+  FCPAnchorItems &
+  FCPMarkerItems & {
+    note?: any;
+    metadata?: any;
+  };
+
+type FCPTitle = FCPElementAttributes &
+  FCPAnchorItems &
+  FCPMarkerItems & {
+    '@_ref': string;
+    '@_role'?: string;
+    text: (FCPTextAttributes & {
+      'text-style': (FCPTextStyleAttributes & {
+        '@_ref': string;
+        '#text': string;
+      })[];
+    })[];
+    'text-style-def': {
+      '@_id': string;
+      'text-style': FCPTextStyleAttributes;
+    }[];
+    param: any;
+    note: any;
+    metadata?: any;
+  };
+
+type FCPXML = {
   fcpxml: {
-    resources: {
-      format: any[];
-      media: any[];
-      effect: any[];
-      asset: any[];
-    };
+    resources: any;
+    'import-options'?: any;
     library: {
       '@_location': string;
       '@_version': string;
@@ -77,17 +177,13 @@ type FCPData = {
           '@_id': string;
           '@_modDate': string;
           sequence: {
-            spine: {
-              gap: FCPGap[];
-              'asset-clip'?: FCPAssetClip[];
-              transition: any;
-              video: any;
-            };
+            spine: FCPSpine;
+            note?: any;
           };
         };
       };
-      'smart-collection': any;
     };
+    'smart-collection': any;
   };
 };
 
@@ -106,8 +202,8 @@ function frameStringToSeconds(frameString?: string) {
 }
 
 function frameStringtoTimingString(
-  frameString: string,
-  initialOffsetFrameString: string = '0/2500s',
+  frameString: string = '0s',
+  initialOffsetFrameString: string = '0s',
   durationFrameString?: string
 ) {
   const numberFractionFormatter = new Intl.NumberFormat('FR-fr', {
@@ -133,7 +229,7 @@ function frameStringtoTimingString(
 export function extractNameAndSubtitles(
   fcpxmlData: string
 ): [string, Subtitle[]] {
-  const alwaysArray = ['gap', 'asset-clip'];
+  const alwaysArray = ['gap', 'asset-clip', 'text-style', 'text', 'title'];
 
   const options = {
     ignoreAttributes: false,
@@ -153,49 +249,58 @@ export function extractNameAndSubtitles(
   };
 
   const parser = new XMLParser(options);
-  const fcpData = parser.parse(fcpxmlData) as FCPData;
+  const fcpData = parser.parse(fcpxmlData) as FCPXML;
 
   const videoTitle = fcpData.fcpxml.library.event.project['@_name'];
 
-  const gapTitles = fcpData.fcpxml.library.event.project.sequence.spine.gap
-    .filter((gap) => gap.title !== undefined)
-    .map((gap) => gap.title)
-    .flat()
-    .filter(
-      (title) => title !== undefined && title['@_role'] === 'SUB ENG.SUB ENG-1'
-    ) as FCPTitle[];
-
+  const gaps = fcpData.fcpxml.library.event.project.sequence.spine.gap ?? [];
   const assetClips =
-    fcpData.fcpxml.library.event.project.sequence.spine['asset-clip'];
-  const assetClipTitles =
-    assetClips === undefined
-      ? []
-      : (assetClips
-          .filter((assetClip) => assetClip.title !== undefined)
-          .map((assetClip) => assetClip.title)
-          .flat() as FCPTitle[]);
+    fcpData.fcpxml.library.event.project.sequence.spine['asset-clip'] ?? [];
 
-  const titles = [...gapTitles, ...assetClipTitles];
+  const elementsWithTitles = [...gaps, ...assetClips].filter(
+    (element) => element.title !== undefined
+  );
 
-  const initialOffset = '0s';
-  // fcpData.fcpxml.library.event.project.sequence.spine.gap['@_start'];
-  // const titles = fcpData.fcpxml.library.event.project.sequence.spine.gap.;
+  if (elementsWithTitles.length === 0) {
+    throw new Error('No titles found in the fcpxml file');
+  }
 
   const subtitles: Subtitle[] = [];
-  for (const title of titles) {
-    if (title.text['text-style'] !== undefined) {
-      subtitles.push({
-        ref: title['@_ref'],
-        timelineIn: frameStringtoTimingString(title['@_offset'], initialOffset),
-        timelineOut: frameStringtoTimingString(
-          title['@_offset'],
-          initialOffset,
-          title['@_duration']
-        ),
-        duration: frameStringtoTimingString(title['@_duration']),
-        text: title.text['text-style']['#text'],
+
+  elementsWithTitles.forEach((element) => {
+    const initialOffset = element['@_start'];
+    const titles = element.title as FCPTitle[];
+    titles.forEach((title) => {
+      title.text.forEach((text) => {
+        if (text['text-style'] !== undefined) {
+          subtitles.push({
+            ref: title['@_ref'],
+            timelineIn: frameStringtoTimingString(
+              title['@_offset'],
+              initialOffset
+            ),
+            timelineOut: frameStringtoTimingString(
+              title['@_offset'],
+              initialOffset,
+              title['@_duration']
+            ),
+            duration: frameStringtoTimingString(title['@_duration']),
+            text: text['text-style']
+              .reduce(
+                (accumulator, currentValue) =>
+                  (accumulator = accumulator + ' ' + currentValue['#text']),
+                ''
+              )
+              .trim(),
+          });
+        }
       });
-    }
-  }
-  return [videoTitle, subtitles];
+    });
+  });
+
+  const orderedSubtitles = subtitles.sort((a, b) => {
+    return a.timelineIn.localeCompare(b.timelineIn);
+  });
+
+  return [videoTitle, orderedSubtitles];
 }
