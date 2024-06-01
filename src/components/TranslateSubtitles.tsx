@@ -2,7 +2,7 @@
 
 import { FormEvent, useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { createFile, translate } from '@/app/actions';
+import { translate } from '@/app/actions';
 import { Label } from './ui/label';
 import { Button } from './ui/button';
 import Spinner from './Spinner';
@@ -17,9 +17,7 @@ import {
 } from '@/components/ui/table';
 import { Download, Languages } from 'lucide-react';
 import Link from 'next/link';
-import { Textarea } from './ui/textarea';
 import { LabelsDictionary } from '@/app/dictionaries';
-import { cn } from '@/lib/utils';
 
 const languages = {
   FRA: 'Français',
@@ -68,53 +66,53 @@ export default function TranslateSubtitles({
     message: '',
   };
 
-  const [state, formAction] = useActionState(createFile, initialState);
+  // const [state, formAction] = useActionState(createFile, initialState);
   const [translationState, translateAction] = useActionState(
     translate,
     initialTranslateState
   );
 
-  function SubmitButton({ url }: { url?: string }) {
-    const { pending } = useFormStatus();
+  // function SubmitButton({ url }: { url?: string }) {
+  //   const { pending } = useFormStatus();
 
-    if (url) {
-      return (
-        <Link
-          target='_blank'
-          href={url}
-          rel='noopener noreferrer'
-          download={filename}
-          className='flex gap-2 items-center justify-center mx-auto mt-8  p-2 text-lg'
-        >
-          <Download size={24} />
-          <span>{labelsDict.file.download}</span>
-        </Link>
-      );
-    }
+  //   if (url) {
+  //     return (
+  //       <Link
+  //         target='_blank'
+  //         href={url}
+  //         rel='noopener noreferrer'
+  //         download={filename}
+  //         className='flex gap-2 items-center justify-center mx-auto mt-8  p-2 text-lg'
+  //       >
+  //         <Download size={24} />
+  //         <span>{labelsDict.file.download}</span>
+  //       </Link>
+  //     );
+  //   }
 
-    return (
-      <Button
-        className='flex gap-2 w-fit mx-auto mt-8 text-lg'
-        size={'lg'}
-        type='submit'
-        disabled={pending}
-        aria-disabled={pending}
-      >
-        {pending && <Spinner />}
-        {pending ? labelsDict.file.creatingFile : labelsDict.file.createFile}
-      </Button>
-    );
-  }
+  //   return (
+  //     <Button
+  //       className='flex gap-2 w-fit mx-auto mt-8 text-lg'
+  //       size={'lg'}
+  //       type='submit'
+  //       disabled={pending}
+  //       aria-disabled={pending}
+  //     >
+  //       {pending && <Spinner />}
+  //       {pending ? labelsDict.file.creatingFile : labelsDict.file.createFile}
+  //     </Button>
+  //   );
+  // }
 
-  function autoresize(event: FormEvent<HTMLTextAreaElement>) {
-    const self = event.currentTarget as HTMLTextAreaElement;
-    event.bubbles = true;
-    self.style.height = '0px';
-    self.style.height = self.scrollHeight + 'px';
-  }
+  // function autoresize(event: FormEvent<HTMLTextAreaElement>) {
+  //   const self = event.currentTarget as HTMLTextAreaElement;
+  //   event.bubbles = true;
+  //   self.style.height = '0px';
+  //   self.style.height = self.scrollHeight + 'px';
+  // }
 
   return (
-    <form className='w-full flex flex-col gap-2 p-4' action={formAction}>
+    <form className='w-full flex flex-col gap-2 p-4' /* action={formAction} */>
       <div className='relative flex gap-8 p-2 items-center justify-end mb-4'>
         <div className='flex justify-evenly w-1/2'>
           <div className='flex gap-2 items-center'>
@@ -157,34 +155,49 @@ export default function TranslateSubtitles({
             <TableHead className='w-[24rem]'>
               {labelsDict.translate.subtitle}
             </TableHead>
-            <TableHead className='w-[24rem] rounded-e-md flex flex-col'>
-              <p>{languages[language]}</p>
-              <p className='italic text-sm -mt-1'>
-                {labelsDict.translate.warningLength}
-              </p>
+            <TableHead className='w-[24rem] rounded-e-md'>
+              {languages[language]}
             </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {subtitles.map((subtitle, index) => (
-            <TableRow key={index} className='group py-2'>
+            <TableRow key={index} className='py-2'>
               <TableCell className='w-6 align-center py-2'>
                 <p>{index + 1}</p>
               </TableCell>
               <TableCell className='align-center'>
-                <p className='p-2 text-base font-medium rounded-md group-focus-within:bg-secondary group-focus-within:text-secondary-foreground transition-colors duration-100 ease-in-out'>
-                  {subtitle.text}
-                </p>
+                <p
+                  className='p-2 text-base font-medium'
+                  dangerouslySetInnerHTML={{
+                    __html: `<p>${subtitle.titles
+                      .map((title) =>
+                        title.highlighted
+                          ? `<span class='text-red-500'>${title.text}</span>`
+                          : title.text
+                      )
+                      .join(' ')}</p>`,
+                  }}
+                />
+                {/* <p className='p-2 text-base font-medium rounded-md group-focus-within:bg-secondary group-focus-within:text-secondary-foreground transition-colors duration-100 ease-in-out'>
+                  {subtitle.titles
+                    .map((title) =>
+                      title.highlighted
+                        ? `<span style= {color:'red'}>${title.text}</span>`
+                        : title.text
+                    )
+                    .join(' ')}
+                </p> */}
               </TableCell>
               <TableCell className='w-[45em]py-1'>
-                <Textarea
-                  className={cn(
-                    'bg-muted-foreground text-base',
-                    translationState.translations[index].length >
-                      1.1 * subtitle.text.length
-                      ? 'text-red-500'
-                      : 'text-muted'
-                  )}
+                <p
+                  className='p-2 text-base font-medium'
+                  dangerouslySetInnerHTML={{
+                    __html: `<p>${translationState.translations[index]}</p>`,
+                  }}
+                />
+                {/* <Textarea
+                  className={'text-muted bg-muted-foreground text-base'}
                   id={subtitle.ref}
                   name={subtitle.ref}
                   defaultValue={translationState.translations[index]}
@@ -192,24 +205,15 @@ export default function TranslateSubtitles({
                     translationState.translations[index].replace(/'\.|,'/g, '')
                       .length / 55
                   )}
-                  onInput={(event) => {
-                    const self = event.currentTarget as HTMLTextAreaElement;
-                    const value = self.value;
-                    if (value.length > 1.1 * subtitle.text.length) {
-                      self.classList.add('text-red-500');
-                    } else {
-                      self.classList.remove('text-red-500');
-                    }
-                    autoresize(event);
-                  }}
+                  onInput={autoresize}
                   required
-                />
+                /> */}
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-      <SubmitButton url={state.url} />
+      {/* <SubmitButton url={state.url} /> */}
     </form>
   );
 }

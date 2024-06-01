@@ -5,11 +5,6 @@ import { extractNameAndSubtitles } from '@/lib/fcpxmlParser';
 import TranslateSubtitles from '@/components/TranslateSubtitles';
 import { SuppportedLocale, getDictionary } from '@/app/dictionaries';
 
-export type Subtitle = {
-  subtitle: string;
-  ref: string;
-};
-
 export default async function ModifySubtitles({
   searchParams,
   params: { lang },
@@ -48,7 +43,13 @@ export default async function ModifySubtitles({
   const [videoTitle, subtitles] = extractNameAndSubtitles(fcpxmlData);
 
   const translations = subtitles.map((subtitle) => {
-    return subtitle.text;
+    return subtitle.titles
+      .map((title) =>
+        title.highlighted
+          ? `<span class='text-red-500'>${title.text}</span>`
+          : title.text
+      )
+      .join(' ');
   });
 
   return (

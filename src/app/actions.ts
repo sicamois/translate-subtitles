@@ -59,65 +59,65 @@ export async function uploadFile(
   redirect(`/translate?file=${encryptedFile}`);
 }
 
-export async function createFile(
-  currentState: {
-    subtitles: Subtitle[];
-    videoTitle: string;
-    url?: string;
-    message: string;
-  },
-  fromData: FormData
-) {
-  const s3Client = new S3Client({ region: 'eu-west-3' });
+// export async function createFile(
+//   currentState: {
+//     subtitles: Subtitle[];
+//     videoTitle: string;
+//     url?: string;
+//     message: string;
+//   },
+//   fromData: FormData
+// ) {
+//   const s3Client = new S3Client({ region: 'eu-west-3' });
 
-  const language = fromData.get('language');
-  const translations = Array.from(fromData.entries()).filter(
-    ([key]) => key !== 'language'
-  );
-  const srtSubtites = translations.map(([ref, translation], index) => {
-    const subtitle = currentState.subtitles.find(
-      (subtitle) => subtitle.ref === ref
-    );
-    return `${index + 1}\n${subtitle?.timelineIn} --> ${
-      subtitle?.timelineOut
-    }\n${translation}`;
-  });
+//   const language = fromData.get('language');
+//   const translations = Array.from(fromData.entries()).filter(
+//     ([key]) => key !== 'language'
+//   );
+//   const srtSubtites = translations.map(([ref, translation], index) => {
+//     const subtitle = currentState.subtitles.find(
+//       (subtitle) => subtitle.ref === ref
+//     );
+//     return `${index + 1}\n${subtitle?.timelineIn} --> ${
+//       subtitle?.timelineOut
+//     }\n${translation}`;
+//   });
 
-  const srtData = `${srtSubtites.join('\n\n')}`;
+//   const srtData = `${srtSubtites.join('\n\n')}`;
 
-  const generatedFilename = `generated/${currentState.videoTitle} - SUB ${language}.srt`;
+//   const generatedFilename = `generated/${currentState.videoTitle} - SUB ${language}.srt`;
 
-  try {
-    // Put an object into an Amazon S3 bucket.
-    const putCommand = new PutObjectCommand({
-      Bucket: process.env.AWS_S3_BUCKET_NAME,
-      Key: generatedFilename,
-      Body: srtData,
-    });
-    await s3Client.send(putCommand);
+//   try {
+//     // Put an object into an Amazon S3 bucket.
+//     const putCommand = new PutObjectCommand({
+//       Bucket: process.env.AWS_S3_BUCKET_NAME,
+//       Key: generatedFilename,
+//       Body: srtData,
+//     });
+//     await s3Client.send(putCommand);
 
-    // Get a pre-signed URL to download the file.
-    const getCommand = new GetObjectCommand({
-      Bucket: process.env.AWS_S3_BUCKET_NAME,
-      Key: generatedFilename,
-    });
-    const url = await getSignedUrl(s3Client, getCommand, { expiresIn: 600 });
+//     // Get a pre-signed URL to download the file.
+//     const getCommand = new GetObjectCommand({
+//       Bucket: process.env.AWS_S3_BUCKET_NAME,
+//       Key: generatedFilename,
+//     });
+//     const url = await getSignedUrl(s3Client, getCommand, { expiresIn: 600 });
 
-    return {
-      subtitles: currentState.subtitles,
-      videoTitle: currentState.videoTitle,
-      url,
-      message: 'Le nouveau fichier a été créé avec succès',
-    };
-  } catch (e) {
-    console.error(e);
-    return {
-      subtitles: currentState.subtitles,
-      message: `Erreur lors de la création du nouveau fichier (${e})`,
-      videoTitle: currentState.videoTitle,
-    };
-  }
-}
+//     return {
+//       subtitles: currentState.subtitles,
+//       videoTitle: currentState.videoTitle,
+//       url,
+//       message: 'Le nouveau fichier a été créé avec succès',
+//     };
+//   } catch (e) {
+//     console.error(e);
+//     return {
+//       subtitles: currentState.subtitles,
+//       message: `Erreur lors de la création du nouveau fichier (${e})`,
+//       videoTitle: currentState.videoTitle,
+//     };
+//   }
+// }
 
 export async function translate(
   currentState: {
@@ -140,7 +140,7 @@ export async function translate(
     currentState.translations,
     null,
     targetLanguage,
-    { preserveFormatting: true }
+    { preserveFormatting: true, tagHandling: 'html' }
   );
 
   return {
