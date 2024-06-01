@@ -30,13 +30,11 @@ const languages = {
 export type AcceptedLanguages = keyof typeof languages;
 
 export default function TranslateSubtitles({
-  filename,
   videoTitle,
   subtitles,
   translations,
   labelsDict,
 }: {
-  filename: string;
   videoTitle: string;
   subtitles: Subtitle[];
   translations: string[];
@@ -59,10 +57,12 @@ export default function TranslateSubtitles({
   };
 
   const initialTranslateState: {
+    subtitles: Subtitle[];
     translations: string[];
     message: string;
   } = {
-    translations,
+    subtitles,
+    translations: [],
     message: '',
   };
 
@@ -151,7 +151,7 @@ export default function TranslateSubtitles({
       <Table className='overflow-hidden'>
         <TableHeader className='text-lg font-medium bg-primary text-primary-foreground'>
           <TableRow>
-            <TableHead className='rounded-s-md'>#</TableHead>
+            <TableHead className='w-6 rounded-s-md'>#</TableHead>
             <TableHead className='w-[24rem]'>
               {labelsDict.translate.subtitle}
             </TableHead>
@@ -163,52 +163,27 @@ export default function TranslateSubtitles({
         <TableBody>
           {subtitles.map((subtitle, index) => (
             <TableRow key={index} className='py-2'>
-              <TableCell className='w-6 align-center py-2'>
+              <TableCell className='w-6 py-2'>
                 <p>{index + 1}</p>
               </TableCell>
-              <TableCell className='align-center'>
-                <p
-                  className='p-2 text-base font-medium'
-                  dangerouslySetInnerHTML={{
-                    __html: `<p>${subtitle.titles
-                      .map((title) =>
-                        title.highlighted
-                          ? `<span class='text-red-500'>${title.text}</span>`
-                          : title.text
-                      )
-                      .join(' ')}</p>`,
-                  }}
-                />
-                {/* <p className='p-2 text-base font-medium rounded-md group-focus-within:bg-secondary group-focus-within:text-secondary-foreground transition-colors duration-100 ease-in-out'>
-                  {subtitle.titles
-                    .map((title) =>
-                      title.highlighted
-                        ? `<span style= {color:'red'}>${title.text}</span>`
-                        : title.text
-                    )
-                    .join(' ')}
-                </p> */}
+              <TableCell className='w-[24rem] flex flex-wrap gap-1 p-2 text-base font-medium'>
+                {subtitle.titles.map((title, index) =>
+                  title.highlighted ? (
+                    <span key={index} className='text-red-500'>
+                      {title.text}
+                    </span>
+                  ) : (
+                    <p key={index}>{title.text}</p>
+                  )
+                )}
               </TableCell>
-              <TableCell className='w-[45em]py-1'>
-                <p
-                  className='p-2 text-base font-medium'
-                  dangerouslySetInnerHTML={{
-                    __html: `<p>${translationState.translations[index]}</p>`,
-                  }}
-                />
-                {/* <Textarea
-                  className={'text-muted bg-muted-foreground text-base'}
-                  id={subtitle.ref}
-                  name={subtitle.ref}
-                  defaultValue={translationState.translations[index]}
-                  rows={Math.ceil(
-                    translationState.translations[index].replace(/'\.|,'/g, '')
-                      .length / 55
-                  )}
-                  onInput={autoresize}
-                  required
-                /> */}
-              </TableCell>
+              <TableCell
+                className='w-[24rem] p-2 text-base font-medium'
+                dir='auto'
+                dangerouslySetInnerHTML={{
+                  __html: translationState.translations[index],
+                }}
+              ></TableCell>
             </TableRow>
           ))}
         </TableBody>

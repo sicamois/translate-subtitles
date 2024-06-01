@@ -121,6 +121,7 @@ export async function uploadFile(
 
 export async function translate(
   currentState: {
+    subtitles: Subtitle[];
     translations: string[];
     message: string;
   },
@@ -128,6 +129,7 @@ export async function translate(
 ) {
   if (!process.env.DEEPL_API_KEY) {
     return {
+      subtitles: currentState.subtitles,
       translations: currentState.translations,
       message: 'Veuillez configurer une clé API DeepL',
     };
@@ -137,13 +139,23 @@ export async function translate(
     .get('language')
     ?.slice(0, 2) as TargetLanguageCode;
   const newTranslations = await translator.translateText(
-    currentState.translations,
+    currentState.subtitles.map((subtitle) => {
+      return subtitle.titles
+        .map(
+          (title) =>
+            `<span class='${title.highlighted ? 'text-red-500' : ''}'>${
+              title.text
+            }</span>`
+        )
+        .join(' ');
+    }),
     null,
     targetLanguage,
     { preserveFormatting: true, tagHandling: 'html' }
   );
 
   return {
+    subtitles: currentState.subtitles,
     translations: newTranslations.map((translation) => translation.text),
     message: 'Les sous-titres ont été traduits avec succès',
   };
