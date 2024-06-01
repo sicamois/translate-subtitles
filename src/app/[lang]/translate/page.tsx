@@ -61,7 +61,7 @@ export default async function ModifySubtitles({
         {labelsDict.translate.translateSubtitles}
       </h2>
       <TranslateSubtitles
-        videoTitle={videoTitle}
+        videoTitle={videoTitle || filename}
         subtitles={subtitles}
         translations={translations}
         labelsDict={labelsDict}
