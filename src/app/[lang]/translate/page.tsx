@@ -77,11 +77,11 @@ export default async function ModifySubtitles({
   });
 
   return (
-    <div className='flex flex-col w-full'>
-      <h1 className='text-center text-4xl font-thin drop-shadow-sm mb-4'>
+    <main className='flex flex-col w-full'>
+      <h1 className='text-center text-2xl sm:text-4xl font-thin drop-shadow-sm p-6'>
         {videoTitle}
       </h1>
-      <h2 className='text-center text-xl italic font-thin drop-shadow-sm mb-2'>
+      <h2 className='text-center text-xl italic font-thin drop-shadow-sm'>
         {labelsDict.translate.translateSubtitles}
       </h2>
       <Suspense fallback='Loading...'>
@@ -107,6 +107,6 @@ export default async function ModifySubtitles({
         translations={translations}
         labelsDict={labelsDict}
       />
-    </div>
+    </main>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { ChangeEvent, useActionState, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { uploadFile } from '@/app/actions';
 import { Input } from './ui/input';
@@ -17,28 +17,25 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
   };
 
   const [state, formAction] = useActionState(uploadFile, initialState);
+  const [pending, setPending] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
-  function SubmitButton() {
-    const { pending } = useFormStatus();
+  function onFileSelected(event: ChangeEvent<HTMLInputElement>) {
+    if (!formRef.current) return;
 
-    return (
-      <Button
-        className='flex gap-2 w-fit mt-8 text-lg'
-        size={'lg'}
-        type='submit'
-        disabled={pending}
-        aria-disabled={pending}
-      >
-        {pending && <Spinner />}
-        {pending ? labelsDict.file.uploading : labelsDict.file.upload}
-      </Button>
-    );
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setPending(true);
+    const formData = new FormData(formRef.current);
+    formAction(formData);
   }
 
   return (
     <form
       className='flex flex-col gap-3 items-center m-auto'
       action={formAction}
+      ref={formRef}
     >
       <Label htmlFor='file' className='text-center'>
         {labelsDict.file.selectFile}
@@ -50,8 +47,14 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
         name='file'
         accept='.fcpxml'
         required
+        onChange={onFileSelected}
       />
-      <SubmitButton />
+      {pending ? (
+        <div className='h-8 text-lg flex gap-2 items-center'>
+          <Spinner />
+          <p>{labelsDict.file.uploading}</p>
+        </div>
+      ) : null}
       <p aria-live='polite' className='sr-only' role='status'>
         {state?.message}
       </p>

@@ -130,16 +130,13 @@ export default async function RootLayout({
           fontSans.variable
         )}
       >
-        <div className='font-sans flex flex-col items-center justify-items-center w-max sm:w-full min-h-screen pb-10'>
-          <header className='flex justify-center items-center gap-8 w-full'>
-            <p className='bg-muted p-2 text-4xl text-muted-foreground text-center w-full'>
+        <div className='font-sans flex flex-col items-center justify-items-center w-full h-screen max-w-full'>
+          <header className='flex w-full sticky inset-0 z-50'>
+            <p className='bg-muted p-2 text-2xl sm:text-4xl text-muted-foreground text-center w-full'>
               Translate Subtitles
             </p>
           </header>
-          <main className='flex flex-col gap-8 row-start-2 items-center sm:items-start p-8'>
-            {children}
-          </main>
-          <footer className='row-start-3 flex gap-6 flex-wrap items-center justify-center'></footer>
+          {children}
         </div>
         <SpeedInsights />
         <Analytics />

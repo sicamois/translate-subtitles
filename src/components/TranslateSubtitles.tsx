@@ -112,7 +112,7 @@ export default function TranslateSubtitles({
   // }
 
   return (
-    <form className='w-full flex flex-col gap-2 p-4' /* action={formAction} */>
+    <form className='w-full flex flex-col gap-2 p-2' /* action={formAction} */>
       <Table className='overflow-hidden'>
         <TableHeader className='text-lg font-medium bg-primary text-primary-foreground'>
           <TableRow>
@@ -153,40 +153,39 @@ export default function TranslateSubtitles({
           ))}
         </TableBody>
       </Table>
-      <div className='relative flex gap-8 p-2 items-center justify-end mb-4'>
-        <div className='flex justify-evenly w-1/2'>
-          <div className='flex gap-2 items-center'>
-            <Label htmlFor='language' className='text-xl font-light'>
-              {labelsDict.translate.language}
-            </Label>
-            <select
-              id='language'
-              name='language'
-              className='appearance-none h-10 px-4 bg-muted-foreground text-muted text-xl rounded-md'
-              defaultValue={language}
-              onChange={(e) =>
-                setLanguage(e.target.value as keyof typeof languages)
-              }
-            >
-              {Object.entries(languages).map(([key, value]) => (
-                <option key={key} value={key}>
-                  {value}
-                </option>
-              ))}
-            </select>
-          </div>
-          <Button
-            formAction={translateAction}
-            className='h-10 text-lg bg-gradient-to-r from-pink-400 to-purple-600 hover:from-pink-500 hover:to-purple-700 p-2 transition-colors duration-100 ease-in-out pointer-events-auto'
+      <div className='flex gap-4 flex-wrap p-2 justify-center'>
+        <div className='flex gap-2 items-center'>
+          <Label htmlFor='language' className='text-xl font-light'>
+            {labelsDict.translate.language}
+          </Label>
+          <select
+            id='language'
+            name='language'
+            className='appearance-none h-10 px-4 bg-muted-foreground text-muted text-xl rounded-md'
+            defaultValue={language}
+            onChange={(e) =>
+              setLanguage(e.target.value as keyof typeof languages)
+            }
           >
-            <div className='flex gap-1 items-center'>
-              <Languages className='h-5 w-5' />
-              <p className='font-medium drop-shadow'>
-                {labelsDict.translate.aiAssistant}
-              </p>
-            </div>
-          </Button>
+            {Object.entries(languages).map(([key, value]) => (
+              <option key={key} value={key}>
+                {value}
+              </option>
+            ))}
+          </select>
         </div>
+
+        <Button
+          formAction={translateAction}
+          className='h-10 text-lg bg-gradient-to-r from-pink-400 to-purple-600 hover:from-pink-500 hover:to-purple-700 p-2 transition-colors duration-100 ease-in-out pointer-events-auto'
+        >
+          <div className='flex gap-1 items-center'>
+            <Languages className='h-5 w-5' />
+            <p className='font-medium drop-shadow'>
+              {labelsDict.translate.aiAssistant}
+            </p>
+          </div>
+        </Button>
       </div>
       {/* <SubmitButton url={state.url} /> */}
     </form>
