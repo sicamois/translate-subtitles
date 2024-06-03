@@ -37,7 +37,7 @@ export default function SubtitlesTable({
             <TableHead
               key={index}
               className={cn(
-                'w-6',
+                'w-6 font-medium drop-shadow',
                 index === 0 ? 'rounded-s-md' : 0,
                 index === headers.length - 1 ? 'rounded-e-md' : '',
               )}

@@ -73,8 +73,8 @@ export default function TranslateSubtitles({
   }
 
   return (
-    <div className="flex w-full flex-col items-center gap-6">
-      <section className="flex flex-wrap justify-center gap-6">
+    <div className="flex w-full flex-col items-center gap-8">
+      <section className="flex flex-wrap justify-center gap-x-8 gap-y-6">
         <DownloadFileButton
           href={downloadFileInfos.href}
           filename={downloadFileInfos.filename}
