@@ -30,7 +30,7 @@ export default function UploadFileAlert({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button className="pointer-events-auto m-8 h-10 bg-gradient-to-r from-blue-600 to-emerald-500 p-2 px-4 text-lg transition-colors duration-100 ease-in-out hover:from-blue-700 hover:to-emerald-600">
+        <Button className="pointer-events-auto h-10 bg-gradient-to-r from-blue-600 to-emerald-500 p-2 px-4 text-lg transition-colors duration-100 ease-in-out hover:from-blue-700 hover:to-emerald-600">
           <div className="flex items-center gap-1">
             <p className="font-medium drop-shadow">{labels.alertTrigger}</p>
           </div>

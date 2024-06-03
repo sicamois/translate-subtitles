@@ -45,13 +45,15 @@ export default async function Subtitles({
   };
 
   return (
-    <main className="flex w-full flex-col items-center pb-20">
-      <h1 className="p-6 text-center text-2xl font-thin drop-shadow-sm sm:text-4xl">
-        {videoTitle}
-      </h1>
-      <h2 className="text-center text-xl font-thin italic drop-shadow-sm">
-        {labelsDict.translate.translateSubtitles}
-      </h2>
+    <main className="flex w-full flex-col items-center gap-6 pb-20">
+      <section className="flex flex-col items-center gap-2">
+        <h1 className="mt-8 px-4 text-center text-2xl font-thin drop-shadow-sm sm:text-4xl">
+          {videoTitle}
+        </h1>
+        <h2 className="text-center text-xl font-thin italic drop-shadow-sm">
+          {labelsDict.translate.translateSubtitles}
+        </h2>
+      </section>
       <TranslateSubtitles
         subtitles={subtitles}
         downloadFileInfos={downloadFileInfos}
