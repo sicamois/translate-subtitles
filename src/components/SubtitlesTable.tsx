@@ -29,13 +29,6 @@ export default function SubtitlesTable({
       translatedSubtitles ? translatedSubtitles[index] : undefined,
     ]);
 
-  const titleToParagraph = (title: { text: string; highlighted: boolean }) =>
-    title.highlighted ? (
-      <p className="text-red-500">{title.text}</p>
-    ) : (
-      <p>{title.text}</p>
-    );
-
   return (
     <Table className="m-auto w-fit overflow-hidden">
       <TableHeader className="bg-primary text-lg font-medium text-primary-foreground">
