@@ -23,9 +23,11 @@ export type UploadFileAlertLabels = {
 export default function UploadFileAlert({
   labels,
   formAction,
+  isPending,
 }: {
   labels: UploadFileAlertLabels;
   formAction: (payload: FormData) => void;
+  isPending?: boolean;
 }) {
   return (
     <AlertDialog>
@@ -33,6 +35,7 @@ export default function UploadFileAlert({
         <Button
           className="pointer-events-auto bg-gradient-to-r from-blue-600 to-emerald-500 text-lg transition-colors duration-100 ease-in-out hover:from-blue-700 hover:to-emerald-600"
           size={'lg'}
+          disabled={isPending}
         >
           <p className="font-semibold drop-shadow">{labels.alertTrigger}</p>
         </Button>

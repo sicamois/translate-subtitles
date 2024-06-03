@@ -39,7 +39,10 @@ export default function TranslateSubtitles({
   } = {
     message: '',
   };
-  const [state, formAction] = useActionState(uploadTranslations, initialState);
+  const [state, formAction, isPending] = useActionState(
+    uploadTranslations,
+    initialState,
+  );
   const [translatedSubtitles, setTranslatedSubtitles] = useState<Subtitle[]>();
   const [language, setLanguage] = useState<string>();
 
@@ -69,8 +72,13 @@ export default function TranslateSubtitles({
           href={downloadFileInfos.href}
           filename={downloadFileInfos.filename}
           label={downloadFileInfos.label}
+          disabled={isPending}
         />
-        <UploadFileAlert labels={uploadLabels} formAction={formAction} />
+        <UploadFileAlert
+          labels={uploadLabels}
+          formAction={formAction}
+          isPending={isPending}
+        />
       </section>
       <SubtitlesTable
         originalSubtitles={subtitles}

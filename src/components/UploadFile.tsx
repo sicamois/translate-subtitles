@@ -25,8 +25,10 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
     message: '',
   };
 
-  const [{ message }, formAction] = useActionState(uploadFile, initialState);
-  const [pending, setPending] = useState(false);
+  const [{ message }, formAction, isPending] = useActionState(
+    uploadFile,
+    initialState,
+  );
   const formRef = useRef<HTMLFormElement>(null);
 
   const langArray = Object.entries(languages) as [AcceptedLanguages, string][];
@@ -36,7 +38,6 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
 
   useEffect(() => {
     if (message !== '') {
-      setPending(false);
       formRef?.current?.reset();
       toast(ToastContent('Error on file upload', message));
     }
@@ -48,7 +49,6 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    setPending(true);
     const formData = new FormData(formRef.current);
     formAction(formData);
   }
@@ -71,7 +71,7 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
         required
         onChange={onFileSelected}
       />
-      {pending ? (
+      {isPending ? (
         <div className="flex h-8 items-center gap-2 text-lg">
           <Spinner />
           <p>{labelsDict.file.uploading}</p>

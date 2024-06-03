@@ -6,6 +6,7 @@ export type DownloadFileButtonInfos = {
   href: string;
   filename: string;
   label: string;
+  disabled?: boolean;
 };
 
 export default function DownloadFileButton({
@@ -13,6 +14,7 @@ export default function DownloadFileButton({
   filename,
   label,
   className,
+  disabled,
 }: DownloadFileButtonInfos & {
   className?: string;
 }) {
@@ -30,6 +32,7 @@ export default function DownloadFileButton({
           className,
         )}
         size={'lg'}
+        disabled={disabled}
       >
         <p className="font-semibold drop-shadow">{label}</p>
       </Button>
