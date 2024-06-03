@@ -19,13 +19,13 @@ import { Download, Languages } from 'lucide-react';
 import Link from 'next/link';
 import { LabelsDictionary } from '@/app/dictionaries';
 
-const languages = {
+export const languages = {
   FRA: 'Français',
   ESP: 'Español',
   ARA: 'Arabic',
   ITA: 'Italiano',
   RUS: 'Russkiy',
-};
+} as const;
 
 export type AcceptedLanguages = keyof typeof languages;
 
