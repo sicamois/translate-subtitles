@@ -11,7 +11,7 @@ import JSZip from 'jszip';
 export async function createXlsxFileDataFromSubtitles(
   subtitles: Subtitle[],
   name: string,
-  lang: string
+  lang: string,
 ) {
   const refColName = 'Ref';
   const firstColName = 'Subtitle';
@@ -71,7 +71,7 @@ export async function createXlsxFileDataFromSubtitles(
 export async function createZipFromSubtitles(
   subtitles: Subtitle[],
   name: string,
-  langs: string[]
+  langs: string[],
 ) {
   const zip = new JSZip();
 
@@ -98,7 +98,7 @@ export async function createZipFromSubtitles(
   } catch (e) {
     console.error(e);
     throw new Error(
-      'Erreur lors de la création du fichier Zip contenant les fichiers Excel'
+      'Erreur lors de la création du fichier Zip contenant les fichiers Excel',
     );
   }
 }

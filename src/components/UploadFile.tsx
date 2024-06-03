@@ -38,35 +38,35 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
 
   return (
     <form
-      className='flex flex-col gap-3 items-center m-auto'
+      className="m-auto flex flex-col items-center gap-3"
       action={formAction}
       ref={formRef}
     >
-      <Label htmlFor='file' className='text-center'>
+      <Label htmlFor="file" className="text-center">
         {labelsDict.file.selectFile}
       </Label>
       <Input
-        className='text-lg'
-        type='file'
-        id='file'
-        name='file'
-        accept='.fcpxml'
+        className="text-lg"
+        type="file"
+        id="file"
+        name="file"
+        accept=".fcpxml"
         required
         onChange={onFileSelected}
       />
       {pending ? (
-        <div className='h-8 text-lg flex gap-2 items-center'>
+        <div className="flex h-8 items-center gap-2 text-lg">
           <Spinner />
           <p>{labelsDict.file.uploading}</p>
         </div>
       ) : null}
-      <p aria-live='polite' className='sr-only' role='status'>
+      <p aria-live="polite" className="sr-only" role="status">
         {state?.message}
       </p>
-      <div className='flex justify-center gap-4 mt-8'>
+      <div className="mt-8 flex justify-center gap-4">
         {langArray.map(([key, value]) => (
-          <div key={key} className='flex flex-col gap-2'>
-            <Label htmlFor={key} className='text-center'>
+          <div key={key} className="flex flex-col gap-2">
+            <Label htmlFor={key} className="text-center">
               {value}
             </Label>
             <Switch
@@ -78,7 +78,7 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
                   setSelectedLanguages([...selectedLanguages, key]);
                 } else {
                   setSelectedLanguages(
-                    selectedLanguages.filter((l) => l !== key)
+                    selectedLanguages.filter((l) => l !== key),
                   );
                 }
               }}

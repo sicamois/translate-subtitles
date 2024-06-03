@@ -31,7 +31,7 @@ function extractTitleElements(element: any): FCPTitle[] {
 }
 
 export function extractNameAndSubtitles(
-  fcpxmlData: string
+  fcpxmlData: string,
 ): [string | undefined, Subtitle[]] {
   const alwaysArray = [
     'event',
@@ -62,7 +62,7 @@ export function extractNameAndSubtitles(
       name: string,
       jpath: string,
       isLeafNode: boolean,
-      isAttribute: boolean
+      isAttribute: boolean,
     ) => {
       if (
         alwaysArray.indexOf(name) !== -1 &&
@@ -115,7 +115,7 @@ export function extractNameAndSubtitles(
           const text = textStyle['#text'] ?? '\n';
           // We are sure to find the textStyleRef in the textStyleDefs
           const textStyleDef = textStyleDefs.find(
-            (def) => def['@_id'] === textStyleRef
+            (def) => def['@_id'] === textStyleRef,
           )!;
           const correxpondingTextStyle = textStyleDef['text-style'];
           const fontColorValue =

@@ -127,12 +127,12 @@ export default async function RootLayout({
       <body
         className={cn(
           'min-h-screen bg-background font-sans antialiased',
-          fontSans.variable
+          fontSans.variable,
         )}
       >
-        <div className='font-sans flex flex-col items-center justify-items-center w-full h-screen max-w-full'>
-          <header className='flex w-full sticky inset-0 z-50'>
-            <p className='bg-muted p-2 text-2xl sm:text-4xl text-muted-foreground text-center w-full'>
+        <div className="flex h-screen w-full max-w-full flex-col items-center justify-items-center font-sans">
+          <header className="sticky inset-0 z-50 flex w-full">
+            <p className="w-full bg-muted p-2 text-center text-2xl text-muted-foreground sm:text-4xl">
               Translate Subtitles
             </p>
           </header>

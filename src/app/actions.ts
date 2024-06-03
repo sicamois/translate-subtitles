@@ -15,7 +15,7 @@ export async function uploadFile(
   currentState: {
     message: string;
   },
-  formData: FormData
+  formData: FormData,
 ) {
   const s3Client = new S3Client({ region: 'eu-west-3' });
 
@@ -131,7 +131,7 @@ export async function translate(
     translations: string[];
     message: string;
   },
-  fromData: FormData
+  fromData: FormData,
 ) {
   if (!process.env.DEEPL_API_KEY) {
     return {
@@ -151,13 +151,13 @@ export async function translate(
           (title) =>
             `<span class='${title.highlighted ? 'text-red-500' : ''}'>${
               title.text
-            }</span>`
+            }</span>`,
         )
         .join(' ');
     }),
     null,
     targetLanguage,
-    { preserveFormatting: true, tagHandling: 'html' }
+    { preserveFormatting: true, tagHandling: 'html' },
   );
 
   return {

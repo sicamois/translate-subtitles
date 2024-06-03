@@ -10,7 +10,7 @@ export default async function Home({
 }) {
   const labelsDict = await getDictionary(lang); // en
   return (
-    <main className='p-8 pt-0 m-auto sm:mt-48'>
+    <main className="m-auto p-8 pt-0 sm:mt-48">
       <UploadFile labelsDict={labelsDict} />
     </main>
   );

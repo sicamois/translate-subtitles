@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { FormEvent, useActionState, useState } from "react";
-import { useFormStatus } from "react-dom";
-import { translate } from "@/app/actions";
-import { Label } from "./ui/label";
-import { Button } from "./ui/button";
-import Spinner from "./Spinner";
-import type { Subtitle } from "@/lib/fcpxmlParser";
+import { FormEvent, useActionState, useState } from 'react';
+import { useFormStatus } from 'react-dom';
+import { translate } from '@/app/actions';
+import { Label } from './ui/label';
+import { Button } from './ui/button';
+import Spinner from './Spinner';
+import type { Subtitle } from '@/lib/fcpxmlParser';
 import {
   Table,
   TableBody,
@@ -14,18 +14,18 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Download, Languages } from "lucide-react";
-import Link from "next/link";
-import { LabelsDictionary } from "@/app/dictionaries";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/table';
+import { Download, Languages } from 'lucide-react';
+import Link from 'next/link';
+import { LabelsDictionary } from '@/app/dictionaries';
+import { cn } from '@/lib/utils';
 
 export const languages = {
-  FRA: "Français",
-  ESP: "Español",
-  ARA: "Arabic",
-  ITA: "Italiano",
-  RUS: "Russkiy",
+  FRA: 'Français',
+  ESP: 'Español',
+  ARA: 'Arabic',
+  ITA: 'Italiano',
+  RUS: 'Russkiy',
 } as const;
 
 export type AcceptedLanguages = keyof typeof languages;
@@ -41,7 +41,7 @@ export default function TranslateSubtitles({
   translations?: string[];
   labelsDict: LabelsDictionary;
 }) {
-  const [language, setLanguage] = useState<AcceptedLanguages>("FRA");
+  const [language, setLanguage] = useState<AcceptedLanguages>('FRA');
 
   const initialState: {
     subtitles: Subtitle[];
@@ -51,7 +51,7 @@ export default function TranslateSubtitles({
   } = {
     subtitles,
     videoTitle,
-    message: "",
+    message: '',
   };
 
   const initialTranslateState: {
@@ -61,7 +61,7 @@ export default function TranslateSubtitles({
   } = {
     subtitles,
     translations: [],
-    message: "",
+    message: '',
   };
 
   // const [state, formAction] = useActionState(createFile, initialState);
@@ -119,8 +119,8 @@ export default function TranslateSubtitles({
             <TableHead className="w-6 rounded-s-md">#</TableHead>
             <TableHead
               className={cn(
-                "w-[24rem]",
-                translations === undefined ? "rounded-e-md" : "",
+                'w-[24rem]',
+                translations === undefined ? 'rounded-e-md' : '',
               )}
             >
               {labelsDict.translate.subtitle}

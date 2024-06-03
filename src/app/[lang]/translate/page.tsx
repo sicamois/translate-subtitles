@@ -69,7 +69,7 @@ export default async function ModifySubtitles({
   const xlsxFilename = await createZipFromSubtitles(
     subtitles,
     videoTitle ?? filename,
-    langs
+    langs,
   );
 
   // Get a pre-signed URL to download the file.
@@ -87,25 +87,25 @@ export default async function ModifySubtitles({
   }
 
   return (
-    <main className='flex flex-col w-full items-center'>
-      <h1 className='text-center text-2xl sm:text-4xl font-thin drop-shadow-sm p-6'>
+    <main className="flex w-full flex-col items-center">
+      <h1 className="p-6 text-center text-2xl font-thin drop-shadow-sm sm:text-4xl">
         {videoTitle}
       </h1>
-      <h2 className='text-center text-xl italic font-thin drop-shadow-sm'>
+      <h2 className="text-center text-xl font-thin italic drop-shadow-sm">
         {labelsDict.translate.translateSubtitles}
       </h2>
-      <div className='flex gap-4'>
-        <Suspense fallback='Loading...'>
+      <div className="flex gap-4">
+        <Suspense fallback="Loading...">
           <Link
-            className='m-auto'
-            target='_blank'
+            className="m-auto"
+            target="_blank"
             href={url}
-            rel='noopener noreferrer'
+            rel="noopener noreferrer"
             download={filename}
           >
-            <Button className='m-8 h-10 text-lg bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 p-2 px-4 transition-colors duration-100 ease-in-out pointer-events-auto'>
-              <div className='flex gap-1 items-center'>
-                <p className='font-medium drop-shadow'>
+            <Button className="pointer-events-auto m-8 h-10 bg-gradient-to-r from-pink-500 to-purple-600 p-2 px-4 text-lg transition-colors duration-100 ease-in-out hover:from-pink-600 hover:to-purple-700">
+              <div className="flex items-center gap-1">
+                <p className="font-medium drop-shadow">
                   {labelsDict.translate.downloadExcelZip}
                 </p>
               </div>
@@ -114,9 +114,9 @@ export default async function ModifySubtitles({
         </Suspense>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button className='m-8 h-10 text-lg bg-gradient-to-r from-blue-600 to-emerald-500 hover:from-blue-700 hover:to-emerald-600 p-2 px-4 transition-colors duration-100 ease-in-out pointer-events-auto'>
-              <div className='flex gap-1 items-center'>
-                <p className='font-medium drop-shadow'>
+            <Button className="pointer-events-auto m-8 h-10 bg-gradient-to-r from-blue-600 to-emerald-500 p-2 px-4 text-lg transition-colors duration-100 ease-in-out hover:from-blue-700 hover:to-emerald-600">
+              <div className="flex items-center gap-1">
+                <p className="font-medium drop-shadow">
                   {labelsDict.translate.uploadTranslatedFile}
                 </p>
               </div>
@@ -133,14 +133,14 @@ export default async function ModifySubtitles({
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <Input
-                type='file'
-                id='translation_file'
-                name='translation_file'
-                accept='.xlsx'
+                type="file"
+                id="translation_file"
+                name="translation_file"
+                accept=".xlsx"
               />
               <AlertDialogFooter>
                 <AlertDialogCancel>{labelsDict.file.cancel}</AlertDialogCancel>
-                <AlertDialogAction type='submit' formAction={upload}>
+                <AlertDialogAction type="submit" formAction={upload}>
                   {labelsDict.file.upload}
                 </AlertDialogAction>
               </AlertDialogFooter>
