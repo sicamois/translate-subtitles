@@ -112,6 +112,7 @@ export async function uploadExcelFile(file: File) {
   if (!worksheet) {
     throw new Error('Aucune feuille de calcul trouvée');
   }
+
   const headers = worksheet.getColumn(3).values;
   console.log(JSON.stringify(headers, null, 2));
 }
