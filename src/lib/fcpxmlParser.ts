@@ -138,9 +138,5 @@ export function extractNameAndSubtitles(
     });
   }
 
-  subtitles.sort((a, b) => {
-    return (a.ref ?? '').localeCompare(b.ref ?? '');
-  });
-
   return [videoTitle, subtitles];
 }
