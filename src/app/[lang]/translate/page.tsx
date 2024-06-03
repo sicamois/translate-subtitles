@@ -50,7 +50,7 @@ export default async function Subtitles({
         <h1 className="mt-8 px-4 text-center text-2xl font-light drop-shadow-sm sm:text-4xl">
           {videoTitle}
         </h1>
-        <h2 className="text-center text-xl font-extralight italic drop-shadow-sm">
+        <h2 className="text-center text-xl font-extralight drop-shadow-sm">
           {labelsDict.translate.translateSubtitles}
         </h2>
       </section>
