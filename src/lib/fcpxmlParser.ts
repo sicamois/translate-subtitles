@@ -1,8 +1,9 @@
+import 'server-only';
 import { XMLParser } from 'fast-xml-parser';
 import type { Title as FCPTitle, FCPXML } from './fcpxmlTypes';
 
 export type Subtitle = {
-  ref: string;
+  ref?: string;
   titles: {
     text: string;
     highlighted: boolean;
@@ -138,7 +139,7 @@ export function extractNameAndSubtitles(
   }
 
   subtitles.sort((a, b) => {
-    return a.ref.localeCompare(b.ref);
+    return (a.ref ?? '').localeCompare(b.ref ?? '');
   });
 
   return [videoTitle, subtitles];

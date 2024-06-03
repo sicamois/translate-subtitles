@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
-import { encrypt } from '@/lib/utils';
+import { encrypt } from '@/lib/encryptionUtils';
 import {
   S3Client,
   PutObjectCommand,
@@ -10,6 +10,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { Subtitle } from '@/lib/fcpxmlParser';
 import { TargetLanguageCode, Translator } from 'deepl-node';
+import { importExcelFile } from '@/lib/xlsxUtils';
 
 export async function uploadFile(
   currentState: {
@@ -63,6 +64,28 @@ export async function uploadFile(
   });
 
   redirect(`/translate?file=${encryptedFile}&langs=${languages.join(',')}`);
+}
+
+export async function uploadTranslations(
+  {
+    message,
+    ...currentState
+  }: {
+    originalSubtitles: Subtitle[];
+    translatedSubtitles?: Subtitle[];
+    language?: string;
+    message: string;
+  },
+  formData: FormData,
+) {
+  const file = formData.get('translation_file') as File;
+  if (file.size === 0)
+    return {
+      message: 'Aucun fichier sélectionné',
+      ...currentState,
+    };
+  const infos = await importExcelFile(file);
+  return { message: 'Fichier importé avec succès', ...infos };
 }
 
 // export async function createFile(

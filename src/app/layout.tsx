@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { cn } from '@/lib/utils';
+import { Toaster } from '@/components/ui/sonner';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { supportedLocales } from './dictionaries';
@@ -130,13 +131,14 @@ export default async function RootLayout({
           fontSans.variable,
         )}
       >
-        <div className="flex h-screen w-full max-w-full flex-col items-center justify-items-center font-sans">
+        <div className="flex min-h-screen w-full max-w-full flex-col items-center justify-items-center font-sans">
           <header className="sticky inset-0 z-50 flex w-full">
             <p className="w-full bg-muted p-2 text-center text-2xl text-muted-foreground sm:text-4xl">
               Translate Subtitles
             </p>
           </header>
           {children}
+          <Toaster />
         </div>
         <SpeedInsights />
         <Analytics />
