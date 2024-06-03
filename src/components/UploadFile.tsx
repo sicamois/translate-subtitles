@@ -1,6 +1,12 @@
 'use client';
 
-import { ChangeEvent, useActionState, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { uploadFile } from '@/app/actions';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -8,6 +14,9 @@ import Spinner from './Spinner';
 import { LabelsDictionary } from '@/app/dictionaries';
 import { Switch } from './ui/switch';
 import { AcceptedLanguages, languages } from './TranslateSubtitles';
+import { toast } from 'sonner';
+import ToastContent from './ToastContent';
+import { set } from 'zod';
 
 export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
   const initialState: {
@@ -16,7 +25,7 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
     message: '',
   };
 
-  const [state, formAction] = useActionState(uploadFile, initialState);
+  const [{ message }, formAction] = useActionState(uploadFile, initialState);
   const [pending, setPending] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -24,6 +33,14 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
   const [selectedLanguages, setSelectedLanguages] = useState<
     AcceptedLanguages[]
   >(['FRA', 'ESP', 'ARA']);
+
+  useEffect(() => {
+    if (message !== '') {
+      setPending(false);
+      formRef?.current?.reset();
+      toast(ToastContent('Error on file upload', message));
+    }
+  }, [message]);
 
   function onFileSelected(event: ChangeEvent<HTMLInputElement>) {
     if (!formRef.current) return;
@@ -60,9 +77,6 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
           <p>{labelsDict.file.uploading}</p>
         </div>
       ) : null}
-      <p aria-live="polite" className="sr-only" role="status">
-        {state?.message}
-      </p>
       <div className="mt-8 flex justify-center gap-4">
         {langArray.map(([key, value]) => (
           <div key={key} className="flex flex-col gap-2">

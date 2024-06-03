@@ -28,8 +28,9 @@ export async function uploadFile(
   });
 
   if (!parse.success) {
+    console.error(parse.error);
     return {
-      message: 'Erreur lors de la récupération du fichier',
+      message: 'Unable to load file',
     };
   }
 
@@ -46,10 +47,10 @@ export async function uploadFile(
       Body: buffer,
     });
     s3output = await s3Client.send(command);
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error(error);
     return {
-      message: 'Erreur lors du téléchargement du fichier',
+      message: `Unable to load file ${file.name}`,
     };
   }
 
@@ -67,125 +68,33 @@ export async function uploadFile(
 }
 
 export async function uploadTranslations(
-  {
-    message,
-    ...currentState
-  }: {
-    originalSubtitles: Subtitle[];
-    translatedSubtitles?: Subtitle[];
+  currentState: {
+    translations?: Subtitle[];
     language?: string;
     message: string;
   },
   formData: FormData,
 ) {
   const file = formData.get('translation_file') as File;
-  if (file.size === 0)
+  if (file.size === 0) {
     return {
-      message: 'Aucun fichier sélectionné',
       ...currentState,
-    };
-  const infos = await importExcelFile(file);
-  return { message: 'Fichier importé avec succès', ...infos };
-}
-
-// export async function createFile(
-//   currentState: {
-//     subtitles: Subtitle[];
-//     videoTitle: string;
-//     url?: string;
-//     message: string;
-//   },
-//   fromData: FormData
-// ) {
-//   const s3Client = new S3Client({ region: 'eu-west-3' });
-
-//   const language = fromData.get('language');
-//   const translations = Array.from(fromData.entries()).filter(
-//     ([key]) => key !== 'language'
-//   );
-//   const srtSubtites = translations.map(([ref, translation], index) => {
-//     const subtitle = currentState.subtitles.find(
-//       (subtitle) => subtitle.ref === ref
-//     );
-//     return `${index + 1}\n${subtitle?.timelineIn} --> ${
-//       subtitle?.timelineOut
-//     }\n${translation}`;
-//   });
-
-//   const srtData = `${srtSubtites.join('\n\n')}`;
-
-//   const generatedFilename = `generated/${currentState.videoTitle} - SUB ${language}.srt`;
-
-//   try {
-//     // Put an object into an Amazon S3 bucket.
-//     const putCommand = new PutObjectCommand({
-//       Bucket: process.env.AWS_S3_BUCKET_NAME,
-//       Key: generatedFilename,
-//       Body: srtData,
-//     });
-//     await s3Client.send(putCommand);
-
-//     // Get a pre-signed URL to download the file.
-//     const getCommand = new GetObjectCommand({
-//       Bucket: process.env.AWS_S3_BUCKET_NAME,
-//       Key: generatedFilename,
-//     });
-//     const url = await getSignedUrl(s3Client, getCommand, { expiresIn: 600 });
-
-//     return {
-//       subtitles: currentState.subtitles,
-//       videoTitle: currentState.videoTitle,
-//       url,
-//       message: 'Le nouveau fichier a été créé avec succès',
-//     };
-//   } catch (e) {
-//     console.error(e);
-//     return {
-//       subtitles: currentState.subtitles,
-//       message: `Erreur lors de la création du nouveau fichier (${e})`,
-//       videoTitle: currentState.videoTitle,
-//     };
-//   }
-// }
-
-export async function translate(
-  currentState: {
-    subtitles: Subtitle[];
-    translations: string[];
-    message: string;
-  },
-  fromData: FormData,
-) {
-  if (!process.env.DEEPL_API_KEY) {
-    return {
-      subtitles: currentState.subtitles,
-      translations: currentState.translations,
-      message: 'Veuillez configurer une clé API DeepL',
+      message: 'Aucun fichier sélectionné',
     };
   }
-  const translator = new Translator(process.env.DEEPL_API_KEY);
-  const targetLanguage = fromData
-    .get('language')
-    ?.slice(0, 2) as TargetLanguageCode;
-  const newTranslations = await translator.translateText(
-    currentState.subtitles.map((subtitle) => {
-      return subtitle.titles
-        .map(
-          (title) =>
-            `<span class='${title.highlighted ? 'text-red-500' : ''}'>${
-              title.text
-            }</span>`,
-        )
-        .join(' ');
-    }),
-    null,
-    targetLanguage,
-    { preserveFormatting: true, tagHandling: 'html' },
-  );
 
-  return {
-    subtitles: currentState.subtitles,
-    translations: newTranslations.map((translation) => translation.text),
-    message: 'Les sous-titres ont été traduits avec succès',
-  };
+  try {
+    const { translations, language } = await importExcelFile(file);
+    return {
+      message: '',
+      translations,
+      language,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      ...currentState,
+      message: `Unable to load file ${file.name}`,
+    };
+  }
 }

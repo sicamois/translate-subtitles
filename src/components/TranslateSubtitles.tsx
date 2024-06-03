@@ -1,6 +1,6 @@
 'use client';
 
-import { useFormState } from 'react-dom';
+import { use, useActionState, useState } from 'react';
 import { uploadTranslations } from '@/app/actions';
 import type { Subtitle } from '@/lib/fcpxmlParser';
 import UploadFileAlert, { UploadFileAlertLabels } from './UploadFileAlert';
@@ -10,6 +10,8 @@ import DownloadFileButton, {
 import SubtitlesTable from './SubtitlesTable';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
+import { set } from 'zod';
+import ToastContent from './ToastContent';
 
 export const languages = {
   FRA: 'Français',
@@ -31,46 +33,34 @@ export default function TranslateSubtitles({
   uploadLabels: UploadFileAlertLabels;
 }) {
   const initialState: {
-    originalSubtitles: Subtitle[];
-    translatedSubtitles?: Subtitle[];
+    translations?: Subtitle[];
     language?: string;
     message: string;
-    finished: boolean;
   } = {
-    originalSubtitles: subtitles,
     message: '',
-    finished: false,
   };
-  const [state, formAction] = useFormState(uploadTranslations, initialState);
-  const { message, originalSubtitles, translatedSubtitles, language } = state;
+  const [state, formAction] = useActionState(uploadTranslations, initialState);
+  const [translatedSubtitles, setTranslatedSubtitles] = useState<Subtitle[]>();
+  const [language, setLanguage] = useState<string>();
 
-  // We put the toast in a useEffect to avoid the SSR error
   useEffect(() => {
-    if (
-      translatedSubtitles !== undefined &&
-      translatedSubtitles.length !== subtitles.length
-    ) {
+    const translations = state.translations;
+    if (state.message !== '') {
+      toast(ToastContent('Problem importing Excel file', state.message));
+    } else if (translations && translations.length !== subtitles.length) {
+      setTranslatedSubtitles(undefined);
+      setLanguage(undefined);
       toast(
-        <article className="text-red-500">
-          <h3 className="mb-2 rounded font-bold underline">
-            Wrong number of subtitles in the Excel file
-          </h3>
-          <p>
-            There are <strong>{subtitles.length}</strong> subtitles in the Final
-            Cut Pro file and <strong>{translatedSubtitles.length}</strong>{' '}
-            translated subtitles in the Excel file`
-          </p>
-        </article>,
+        ToastContent(
+          'Wrong number of subtitles in the Excel file',
+          `There are ${subtitles.length} subtitles in the Final Cut Pro file and ${translations?.length || 0} translated subtitles in the Excel file`,
+        ),
       );
+    } else {
+      setTranslatedSubtitles(translations);
+      setLanguage(state.language);
     }
-  }, [translatedSubtitles, subtitles]);
-
-  let validatedTranslatedSubtitles: Subtitle[] | undefined;
-  let validatedLanguage: string | undefined;
-  if (translatedSubtitles?.length === subtitles.length) {
-    validatedTranslatedSubtitles = translatedSubtitles;
-    validatedLanguage = language;
-  }
+  }, [state, subtitles]);
 
   return (
     <div className="flex w-full flex-col items-center gap-8">
@@ -84,8 +74,8 @@ export default function TranslateSubtitles({
       </section>
       <SubtitlesTable
         originalSubtitles={subtitles}
-        translatedSubtitles={validatedTranslatedSubtitles}
-        language={validatedLanguage}
+        translatedSubtitles={translatedSubtitles}
+        language={language}
       />
     </div>
   );

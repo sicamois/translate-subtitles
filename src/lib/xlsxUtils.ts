@@ -201,8 +201,8 @@ export async function importExcelFile(file: File) {
   const translatedSubtitlesColumns = extractColumn(worksheet, 3);
 
   return {
-    originalSubtitles: columnToSubtitle(originalSubtitlesColumn.column),
-    translatedSubtitles: columnToSubtitle(translatedSubtitlesColumns.column),
+    // originalSubtitles: columnToSubtitle(originalSubtitlesColumn.column),
+    translations: columnToSubtitle(translatedSubtitlesColumns.column),
     language: translatedSubtitlesColumns.name,
   };
 }
