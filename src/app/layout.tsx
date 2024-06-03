@@ -16,6 +16,7 @@ export async function generateStaticParams() {
 
 const fontSans = FontSans({
   variable: '--font-sans',
+  subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
