@@ -5,7 +5,8 @@
     "selectFile": "Select a Final Cut Pro .fcpxml file containing subtitles",
     "createFile": "Create file",
     "creatingFile": "Creating file...",
-    "download": "Download file"
+    "download": "Download",
+    "cancel": "Cancel"
   },
   "translate": {
     "aiAssistant": "AI translation assistant",
@@ -13,6 +14,8 @@
     "language": "Language",
     "subtitle": "Subtitle",
     "warningLength": "red : translation is 10% longer than the original",
-    "downloadExcelZip": "Download Excel files"
+    "downloadExcelZip": "Export Excel files",
+    "uploadTranslatedFile": "Import Translated file",
+    "selectTranslationFile": "Select the Excel file with the translations"
   }
 }

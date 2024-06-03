@@ -5,7 +5,8 @@
     "selectFile": "Sélectionner le fichier Final Cut Pro .fcpxml contenant les sous-titres",
     "createFile": "Créer le nouveau fichier",
     "creatingFile": "Création en cours...",
-    "download": "Télécharger le fichier modifié"
+    "download": "Télécharger le fichier",
+    "cancel": "Annuler"
   },
   "translate": {
     "aiAssistant": "Aide à la traduction",
@@ -13,6 +14,8 @@
     "language": "Langue",
     "subtitle": "Sous-titre",
     "warningLength": "→ rouge : traduction > 110% de l'original",
-    "downloadExcelZip": "Télécharger les fichiers Excel"
+    "downloadExcelZip": "Exporter les fichiers Excel",
+    "uploadTranslatedFile": "Importer le fichier de traduction",
+    "selectTranslationFile": "Sélectionner le fichier Excel contenant les traductions"
   }
 }

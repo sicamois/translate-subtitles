@@ -1,3 +1,4 @@
+import { uploadFile } from '@/app/actions';
 import {
   PutObjectCommand,
   PutObjectCommandOutput,
@@ -100,4 +101,17 @@ export async function createZipFromSubtitles(
       'Erreur lors de la création du fichier Zip contenant les fichiers Excel'
     );
   }
+}
+
+export async function uploadExcelFile(file: File) {
+  const buffer = await file.arrayBuffer();
+  const workbook = new Workbook();
+  await workbook.xlsx.load(buffer);
+
+  const worksheet = workbook.getWorksheet(1);
+  if (!worksheet) {
+    throw new Error('Aucune feuille de calcul trouvée');
+  }
+  const headers = worksheet.getColumn(3).values;
+  console.log(JSON.stringify(headers, null, 2));
 }
