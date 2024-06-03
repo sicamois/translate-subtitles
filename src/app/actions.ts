@@ -7,9 +7,7 @@ import {
   S3Client,
   PutObjectCommand,
   PutObjectCommandOutput,
-  GetObjectCommand,
 } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Subtitle } from '@/lib/fcpxmlParser';
 import { TargetLanguageCode, Translator } from 'deepl-node';
 
@@ -56,7 +54,15 @@ export async function uploadFile(
 
   const encryptedFile = encrypt(file.name, process.env.KEY!);
 
-  redirect(`/translate?file=${encryptedFile}`);
+  let languages: string[] = [];
+
+  Array.from(formData).map(([key, value]) => {
+    if (key !== 'file' && value === 'on') {
+      languages.push(key);
+    }
+  });
+
+  redirect(`/translate?file=${encryptedFile}&langs=${languages.join(',')}`);
 }
 
 // export async function createFile(

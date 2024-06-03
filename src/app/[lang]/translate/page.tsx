@@ -1,16 +1,10 @@
 import { decrypt } from '@/lib/utils';
-import {
-  GetObjectCommand,
-  PutObjectCommand,
-  PutObjectCommandOutput,
-  S3Client,
-} from '@aws-sdk/client-s3';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { notFound } from 'next/navigation';
-import { Subtitle, extractNameAndSubtitles } from '@/lib/fcpxmlParser';
+import { extractNameAndSubtitles } from '@/lib/fcpxmlParser';
 import TranslateSubtitles from '@/components/TranslateSubtitles';
 import { SuppportedLocale, getDictionary } from '@/app/dictionaries';
-import { Workbook } from 'exceljs';
-import { createXlsxFromSubtitles } from '@/lib/xlsxUtils';
+import { createZipFromSubtitles } from '@/lib/xlsxUtils';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -26,6 +20,13 @@ export default async function ModifySubtitles({
   const labelsDict = await getDictionary(lang);
 
   const s3Client = new S3Client({ region: 'eu-west-3' });
+
+  const langsParam = searchParams.langs;
+  if (!langsParam || typeof langsParam !== 'string') {
+    notFound();
+  }
+  const langs = langsParam.split(',');
+
   const encryptedFilename = searchParams.file;
   if (!encryptedFilename || typeof encryptedFilename !== 'string') {
     notFound();
@@ -53,10 +54,10 @@ export default async function ModifySubtitles({
 
   const [videoTitle, subtitles] = extractNameAndSubtitles(fcpxmlData);
 
-  const xlsxFilename = await createXlsxFromSubtitles(
+  const xlsxFilename = await createZipFromSubtitles(
     subtitles,
     videoTitle ?? filename,
-    'FRE'
+    langs
   );
 
   // Get a pre-signed URL to download the file.
@@ -95,7 +96,7 @@ export default async function ModifySubtitles({
           <Button className='m-8 h-10 text-lg bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 p-2 px-4 transition-colors duration-100 ease-in-out pointer-events-auto'>
             <div className='flex gap-1 items-center'>
               <p className='font-medium drop-shadow'>
-                {labelsDict.translate.downloadExcel}
+                {labelsDict.translate.downloadExcelZip}
               </p>
             </div>
           </Button>

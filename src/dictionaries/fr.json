@@ -13,6 +13,6 @@
     "language": "Langue",
     "subtitle": "Sous-titre",
     "warningLength": "→ rouge : traduction > 110% de l'original",
-    "downloadExcel": "Télécharger le fichier Excel"
+    "downloadExcelZip": "Télécharger les fichiers Excel"
   }
 }
