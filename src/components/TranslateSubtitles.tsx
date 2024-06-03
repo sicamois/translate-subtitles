@@ -9,7 +9,7 @@ import DownloadFileButton, {
 } from './DownloadFileButton';
 import SubtitlesTable from './SubtitlesTable';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export const languages = {
   FRA: 'Français',
@@ -30,7 +30,6 @@ export default function TranslateSubtitles({
   downloadFileInfos: DownloadFileButtonInfos;
   uploadLabels: UploadFileAlertLabels;
 }) {
-  const router = useRouter();
   const initialState: {
     originalSubtitles: Subtitle[];
     translatedSubtitles?: Subtitle[];
@@ -45,25 +44,30 @@ export default function TranslateSubtitles({
   const [state, formAction] = useFormState(uploadTranslations, initialState);
   const { message, originalSubtitles, translatedSubtitles, language } = state;
 
+  // We put the toast in a useEffect to avoid the SSR error
+  useEffect(() => {
+    if (
+      translatedSubtitles !== undefined &&
+      translatedSubtitles.length !== subtitles.length
+    ) {
+      toast(
+        <article className="text-red-500">
+          <h3 className="mb-2 rounded font-bold underline">
+            Wrong number of subtitles in the Excel file
+          </h3>
+          <p>
+            There are <strong>{subtitles.length}</strong> subtitles in the Final
+            Cut Pro file and <strong>{translatedSubtitles.length}</strong>{' '}
+            translated subtitles in the Excel file`
+          </p>
+        </article>,
+      );
+    }
+  }, [translatedSubtitles, subtitles]);
+
   let validatedTranslatedSubtitles: Subtitle[] | undefined;
   let validatedLanguage: string | undefined;
-  if (
-    translatedSubtitles !== undefined &&
-    translatedSubtitles.length !== subtitles.length
-  ) {
-    toast(
-      <article className="text-red-500">
-        <h3 className="mb-2 rounded font-bold underline">
-          Wrong number of subtitles in the Excel file
-        </h3>
-        <p>
-          There are <strong>{subtitles.length}</strong> subtitles in the Final
-          Cut Pro file and <strong>{translatedSubtitles.length}</strong>{' '}
-          translated subtitles in the Excel file`
-        </p>
-      </article>,
-    );
-  } else {
+  if (translatedSubtitles?.length === subtitles.length) {
     validatedTranslatedSubtitles = translatedSubtitles;
     validatedLanguage = language;
   }

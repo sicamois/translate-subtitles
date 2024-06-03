@@ -22,7 +22,6 @@ export default function SubtitlesTable({
   if (language) {
     headers.push(language);
   }
-  console.log('headers', headers);
 
   const subtitleTableData: [Subtitle, Subtitle | undefined][] =
     originalSubtitles.map((subtitle, index) => [
