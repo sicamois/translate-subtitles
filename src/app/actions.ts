@@ -9,7 +9,6 @@ import {
   PutObjectCommandOutput,
 } from '@aws-sdk/client-s3';
 import { Subtitle } from '@/lib/fcpxmlParser';
-import { TargetLanguageCode, Translator } from 'deepl-node';
 import { importExcelFile } from '@/lib/xlsxUtils';
 
 export async function uploadFile(

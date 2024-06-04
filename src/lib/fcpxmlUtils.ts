@@ -16,34 +16,33 @@ export async function exctractFCPXMLInfosAndUrl(
     Key: filename,
   });
 
-  let fcpxmlData: string;
-
   try {
     const { Body } = await s3Client.send(command);
     if (Body === undefined) {
       console.error('Impossible de lire le fichier ' + filename);
       notFound();
     }
-    fcpxmlData = await Body.transformToString();
+
+    const fcpxmlData = await Body.transformToString();
+
+    const [videoTitle, subtitles] = extractNameAndSubtitles(fcpxmlData);
+
+    const zipFilename = await createZipFromSubtitles(
+      subtitles,
+      videoTitle ?? filename,
+      langs,
+    );
+
+    // Get a pre-signed URL to download the file.
+    const getCommand = new GetObjectCommand({
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Key: zipFilename,
+    });
+    const url = await getSignedUrl(s3Client, getCommand, { expiresIn: 600 });
+
+    return { videoTitle, subtitles, url, zipFilename };
   } catch (e) {
     console.error(e);
     notFound();
   }
-
-  const [videoTitle, subtitles] = extractNameAndSubtitles(fcpxmlData);
-
-  const zipFilename = await createZipFromSubtitles(
-    subtitles,
-    videoTitle ?? filename,
-    langs,
-  );
-
-  // Get a pre-signed URL to download the file.
-  const getCommand = new GetObjectCommand({
-    Bucket: process.env.AWS_S3_BUCKET_NAME,
-    Key: zipFilename,
-  });
-  const url = await getSignedUrl(s3Client, getCommand, { expiresIn: 600 });
-
-  return { videoTitle, subtitles, url, zipFilename };
 }
