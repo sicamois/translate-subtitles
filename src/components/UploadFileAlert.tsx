@@ -48,13 +48,16 @@ export default function UploadFileAlert({
               {labels.alertDescription}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <Input
-            className="m-2 w-full cursor-pointer rounded-md bg-gray-100 p-2 text-primary"
-            type="file"
-            id="translation_file"
-            name="translation_file"
-            accept=".xlsx"
-          />
+          <div className="rounded-lg bg-gradient-to-l from-blue-600 to-emerald-500 p-[2px]">
+            <Input
+              // className="m-2 h-24 cursor-pointer rounded-md bg-gray-100 p-2 text-primary"
+              className="h-24 cursor-pointer border-none p-9 text-lg text-primary"
+              type="file"
+              id="translation_file"
+              name="translation_file"
+              accept=".xlsx"
+            />
+          </div>
           <AlertDialogFooter>
             <AlertDialogCancel>{labels.cancel}</AlertDialogCancel>
             <AlertDialogAction type="submit" formAction={formAction}>

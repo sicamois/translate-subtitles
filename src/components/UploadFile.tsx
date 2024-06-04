@@ -55,22 +55,24 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
 
   return (
     <form
-      className="m-auto flex flex-col items-center gap-3"
+      className="m-auto flex flex-col items-center gap-4"
       action={formAction}
       ref={formRef}
     >
       <Label htmlFor="file" className="text-center">
         {labelsDict.file.selectFile}
       </Label>
-      <Input
-        className="text-lg"
-        type="file"
-        id="file"
-        name="file"
-        accept=".fcpxml"
-        required
-        onChange={onFileSelected}
-      />
+      <div className="rounded-lg bg-gradient-to-l from-blue-600 to-emerald-500 p-[2px]">
+        <Input
+          className="h-24 cursor-pointer border-none p-9 text-lg text-primary"
+          type="file"
+          id="file"
+          name="file"
+          accept=".fcpxml"
+          required
+          onChange={onFileSelected}
+        />
+      </div>
       {isPending ? (
         <div className="flex h-8 items-center gap-2 text-lg">
           <Spinner />
