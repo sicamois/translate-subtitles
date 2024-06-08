@@ -16,7 +16,6 @@ import { Switch } from './ui/switch';
 import { AcceptedLanguages, languages } from './TranslateSubtitles';
 import { toast } from 'sonner';
 import ToastContent from './ToastContent';
-import { set } from 'zod';
 
 export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
   const initialState: {
@@ -88,6 +87,7 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
             <Switch
               id={key}
               name={key}
+              disabled={isPending}
               checked={selectedLanguages.includes(key)}
               onCheckedChange={(checked) => {
                 if (checked) {

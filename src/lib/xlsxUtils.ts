@@ -1,4 +1,4 @@
-import 'server-only';
+// import 'server-only';
 import {
   PutObjectCommand,
   PutObjectCommandOutput,
@@ -8,6 +8,7 @@ import { Workbook } from 'exceljs';
 import type { CellValue, Worksheet } from 'exceljs';
 import { Subtitle } from './fcpxmlParser';
 import JSZip from 'jszip';
+import fileContentToS3 from './fileContentToS3';
 
 const refColName = 'Ref';
 const subtitleColName = 'Subtitle';
@@ -48,7 +49,12 @@ export async function createExcelFileDataFromSubtitles(
             text: title.text + ' ',
             font: {
               size: 12,
-              color: title.highlighted ? { argb: 'FF0000' } : undefined,
+              color:
+                title.text === '§'
+                  ? { argb: '00FF00' }
+                  : title.highlighted
+                    ? { argb: 'FF0000' }
+                    : undefined,
             },
           };
         }),
@@ -81,20 +87,10 @@ export async function createZipFromSubtitles(
     zip.file(`${name} - SUB ${lang}.xlsx`, arrayBuffer);
   });
 
-  const s3Client = new S3Client({ region: 'eu-west-3' });
-  let s3output: PutObjectCommandOutput;
-
   try {
     const zipFilename = `${name} - SUB.zip`;
     const zipBuffer = await zip.generateAsync({ type: 'uint8array' });
-
-    // Put an object into an Amazon S3 bucket.
-    const command = new PutObjectCommand({
-      Bucket: process.env.AWS_S3_BUCKET_NAME,
-      Key: zipFilename,
-      Body: zipBuffer,
-    });
-    s3output = await s3Client.send(command);
+    await fileContentToS3(zipFilename, zipBuffer);
     return zipFilename;
   } catch (e) {
     console.error(e);

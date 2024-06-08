@@ -37,7 +37,7 @@ export default function SubtitlesTable({
             <TableHead
               key={index}
               className={cn(
-                'w-6 font-medium drop-shadow',
+                'font-medium drop-shadow',
                 index === 0 ? 'rounded-s-md' : 0,
                 index === headers.length - 1 ? 'rounded-e-md' : '',
               )}
@@ -49,19 +49,24 @@ export default function SubtitlesTable({
       </TableHeader>
       <TableBody>
         {subtitleTableData.map((subtitleTableRowData, index) => (
-          <TableRow key={index} className="py-2">
-            <TableCell className="w-6 py-2">
+          <TableRow
+            key={index}
+            className="divide-x divide-dashed divide-muted py-2"
+          >
+            <TableCell className="py-2">
               <p>{index + 1}</p>
             </TableCell>
             {subtitleTableRowData.map((subtitle, subindex) =>
               subtitle ? (
                 <TableCell
                   key={`${index}-${subindex}`}
-                  className="w-[24rem] font-medium"
+                  className="w-[25rem] font-medium"
                 >
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap justify-center gap-1 text-center">
                     {subtitle.titles.map((title) =>
-                      title.highlighted ? (
+                      title.text === '§' ? (
+                        <p key={title.text} className="w-full" />
+                      ) : title.highlighted ? (
                         <p key={title.text} className="text-red-500">
                           {title.text}
                         </p>

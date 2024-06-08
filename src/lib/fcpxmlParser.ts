@@ -1,4 +1,4 @@
-import 'server-only';
+// import 'server-only';
 import { XMLParser } from 'fast-xml-parser';
 import type { Title as FCPTitle, FCPXML } from './fcpxmlTypes';
 
@@ -31,9 +31,7 @@ function extractTitleElements(element: any): FCPTitle[] {
   return titles;
 }
 
-export function extractNameAndSubtitles(
-  fcpxmlData: string,
-): [string | undefined, Subtitle[]] {
+export function extractFcpxml(fcpxmlData: string) {
   const alwaysArray = [
     'event',
     'project',
@@ -56,8 +54,9 @@ export function extractNameAndSubtitles(
   const options = {
     ignoreAttributes: false,
     alwaysCreateTextNode: true,
-    ignoreDeclaration: true,
-    ignorePiTags: true,
+    // ignoreDeclaration: false,
+    // ignorePiTags: true,
+    // preserveOrder: true,
     // parseAttributeValue: true
     isArray: (
       name: string,
@@ -76,9 +75,15 @@ export function extractNameAndSubtitles(
   };
 
   const parser = new XMLParser(options);
-  const fcpData = parser.parse(fcpxmlData) as { fcpxml: FCPXML };
+  return parser.parse(fcpxmlData) as { fcpxml: FCPXML };
+}
 
-  const events = fcpData.fcpxml.library?.event;
+export function extractNameAndSubtitles(
+  fcpxmlData: string,
+): [string | undefined, Subtitle[]] {
+  const { fcpxml } = extractFcpxml(fcpxmlData);
+
+  const events = fcpxml.library?.event;
 
   if (events === undefined) {
     throw new Error('No event found in the fcpxml file');
@@ -113,7 +118,7 @@ export function extractNameAndSubtitles(
         const textStyles = text['text-style'];
         const textTitles = textStyles.map((textStyle) => {
           const textStyleRef = textStyle['@_ref'];
-          const text = textStyle['#text'] ?? '\n';
+          const text = textStyle['#text'] ?? '§';
           // We are sure to find the textStyleRef in the textStyleDefs
           const textStyleDef = textStyleDefs.find(
             (def) => def['@_id'] === textStyleRef,
@@ -123,7 +128,7 @@ export function extractNameAndSubtitles(
             correxpondingTextStyle['@_fontColor']
               ?.split(' ')
               .reduce((acc, value) => acc + parseFloat(value), 0) ?? 0;
-          const highlighted = text !== '\n' && Math.round(fontColorValue) !== 4;
+          const highlighted = text !== '§' && Math.round(fontColorValue) !== 4;
           return {
             textStyleRef,
             text,
@@ -139,4 +144,71 @@ export function extractNameAndSubtitles(
   }
 
   return [videoTitle, subtitles];
+}
+
+export function replaceSubtitlesInFCPXML(
+  fcpxmlData: { fcpxml: FCPXML },
+  subtitles: Subtitle[],
+) {
+  replaceSubtitles(fcpxmlData, subtitles);
+  return fcpxmlData;
+}
+let index = 0;
+function replaceSubtitles(element: any, subtitles: Subtitle[]) {
+  if (index > subtitles.length) {
+    throw new Error(
+      `Not enough subtitles to replace - index: ${index} - subtitles length: ${subtitles.length}`,
+    );
+  }
+  if ('title' in element) {
+    const titles = element.title as FCPTitle[];
+    for (const title of titles) {
+      if (title.text) {
+        title.text.forEach((aText) => {
+          switch (true) {
+            case aText['#text'] !== undefined: {
+              if (subtitles[index].titles.length !== 1) {
+                throw new Error(
+                  `Too many subtitles to replace - index: ${index} - subtitles length: ${subtitles.length}
+subtitles: ${JSON.stringify(subtitles[index], null, 2)}
+text styles: ${JSON.stringify(aText['text-style'], null, 2)}`,
+                );
+              }
+              aText['#text'] = subtitles[index].titles[0].text;
+              index++;
+              return;
+            }
+            case aText['text-style'] !== undefined: {
+              let textStyleIndex = 0;
+              aText['text-style'].forEach((textStyle) => {
+                if (textStyleIndex >= subtitles[index].titles.length) {
+                  throw new Error(
+                    `Too many text styles to replace - index: ${index} - text styles length: ${textStyleIndex + 1} - subtitles length: ${subtitles[index].titles.length}
+subtitles: ${JSON.stringify(subtitles[index], null, 2)}
+text styles: ${JSON.stringify(aText['text-style'], null, 2)}`,
+                  );
+                }
+                textStyle['#text'] =
+                  subtitles[index].titles[textStyleIndex].text;
+                textStyleIndex++;
+              });
+              index++;
+              return;
+            }
+          }
+        });
+      }
+    }
+  }
+
+  for (const key in element) {
+    if (Array.isArray(element[key])) {
+      for (const subElement of element[key]) {
+        replaceSubtitles(subElement, subtitles);
+      }
+      // null is of type object !!!
+    } else if (typeof element[key] === 'object') {
+      replaceSubtitles(element[key], subtitles);
+    }
+  }
 }

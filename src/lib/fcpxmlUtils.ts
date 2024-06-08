@@ -4,27 +4,15 @@ import { notFound } from 'next/navigation';
 import { extractNameAndSubtitles } from './fcpxmlParser';
 import { createZipFromSubtitles } from './xlsxUtils';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import fileContentFromS3 from './fileContentFromS3';
 
 export async function exctractFCPXMLInfosAndUrl(
   filename: string,
   langs: string[],
 ) {
   const s3Client = new S3Client({ region: 'eu-west-3' });
-  // Read the object.
-  const command = new GetObjectCommand({
-    Bucket: process.env.AWS_S3_BUCKET_NAME,
-    Key: filename,
-  });
-
   try {
-    const { Body } = await s3Client.send(command);
-    if (Body === undefined) {
-      console.error('Impossible de lire le fichier ' + filename);
-      notFound();
-    }
-
-    const fcpxmlData = await Body.transformToString();
-
+    const fcpxmlData = await fileContentFromS3(filename);
     const [videoTitle, subtitles] = extractNameAndSubtitles(fcpxmlData);
 
     const zipFilename = await createZipFromSubtitles(

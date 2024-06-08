@@ -55,9 +55,13 @@ export default async function Subtitles({
         </h2>
       </section>
       <TranslateSubtitles
+        fcpxmlFilename={filename}
         subtitles={subtitles}
         downloadFileInfos={downloadFileInfos}
         uploadLabels={uploadLabels}
+        createTranslatedFcpxmlLabel={
+          labelsDict.translate.createTranslatedFcpxml
+        }
       />
     </main>
   );

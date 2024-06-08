@@ -28,7 +28,7 @@ export default function DownloadFileButton({
     >
       <Button
         className={cn(
-          'pointer-events-auto bg-gradient-to-r from-pink-500 to-purple-600 text-lg transition-colors duration-100 ease-in-out hover:from-pink-600 hover:to-purple-700',
+          'pointer-events-auto bg-gradient-to-br from-pink-500 to-purple-600 text-lg transition-colors duration-100 ease-in-out hover:from-pink-600 hover:to-purple-700',
           className,
         )}
         size={'lg'}

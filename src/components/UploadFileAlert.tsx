@@ -33,7 +33,7 @@ export default function UploadFileAlert({
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button
-          className="pointer-events-auto bg-gradient-to-r from-blue-600 to-emerald-500 text-lg transition-colors duration-100 ease-in-out hover:from-blue-700 hover:to-emerald-600"
+          className="pointer-events-auto bg-gradient-to-br from-blue-600 to-emerald-500 text-lg transition-colors duration-100 ease-in-out hover:from-blue-700 hover:to-emerald-600"
           size={'lg'}
           disabled={isPending}
         >
@@ -48,7 +48,7 @@ export default function UploadFileAlert({
               {labels.alertDescription}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="rounded-lg bg-gradient-to-l from-blue-600 to-emerald-500 p-[2px]">
+          <div className="rounded-lg bg-gradient-to-tl from-blue-600 to-emerald-500 p-[2px]">
             <Input
               // className="m-2 h-24 cursor-pointer rounded-md bg-gray-100 p-2 text-primary"
               className="h-24 cursor-pointer border-none p-9 text-lg text-primary"

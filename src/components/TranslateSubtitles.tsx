@@ -1,7 +1,7 @@
 'use client';
 
-import { use, useActionState, useState } from 'react';
-import { uploadTranslations } from '@/app/actions';
+import { useActionState, useState } from 'react';
+import { uploadTranslations, createFcpxmlFile } from '@/app/actions';
 import type { Subtitle } from '@/lib/fcpxmlParser';
 import UploadFileAlert, { UploadFileAlertLabels } from './UploadFileAlert';
 import DownloadFileButton, {
@@ -10,8 +10,9 @@ import DownloadFileButton, {
 import SubtitlesTable from './SubtitlesTable';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
-import { set } from 'zod';
 import ToastContent from './ToastContent';
+import { Button } from './ui/button';
+import CreateTranslatedFcpxmlButton from './CreateTranslatedFcpxmlButton';
 
 export const languages = {
   FRA: 'Français',
@@ -24,32 +25,45 @@ export const languages = {
 export type AcceptedLanguages = keyof typeof languages;
 
 export default function TranslateSubtitles({
+  fcpxmlFilename,
   subtitles,
   downloadFileInfos,
   uploadLabels,
+  createTranslatedFcpxmlLabel,
 }: {
+  fcpxmlFilename: string;
   subtitles: Subtitle[];
   downloadFileInfos: DownloadFileButtonInfos;
   uploadLabels: UploadFileAlertLabels;
+  createTranslatedFcpxmlLabel: string;
 }) {
-  const initialState: {
-    translations?: Subtitle[];
+  const uploadTranslationInitialState: {
+    translatedSubtitles?: Subtitle[];
     language?: string;
     message: string;
   } = {
     message: '',
   };
-  const [state, formAction, isPending] = useActionState(
-    uploadTranslations,
-    initialState,
-  );
+  const [
+    uploadTranslationsState,
+    uploadTranslationsFormAction,
+    isuploadTranslationsPending,
+  ] = useActionState(uploadTranslations, uploadTranslationInitialState);
+
   const [translatedSubtitles, setTranslatedSubtitles] = useState<Subtitle[]>();
   const [language, setLanguage] = useState<string>();
 
   useEffect(() => {
-    const translations = state.translations;
-    if (state.message !== '') {
-      toast(ToastContent('Problem importing Excel file', state.message));
+    const translations = uploadTranslationsState.translatedSubtitles;
+    const language = uploadTranslationsState.language;
+
+    if (uploadTranslationsState.message !== '') {
+      toast(
+        ToastContent(
+          'Problem importing Excel file',
+          uploadTranslationsState.message,
+        ),
+      );
     } else if (translations && translations.length !== subtitles.length) {
       setTranslatedSubtitles(undefined);
       setLanguage(undefined);
@@ -61,9 +75,9 @@ export default function TranslateSubtitles({
       );
     } else {
       setTranslatedSubtitles(translations);
-      setLanguage(state.language);
+      setLanguage(language);
     }
-  }, [state, subtitles]);
+  }, [uploadTranslationsState, subtitles]);
 
   return (
     <div className="flex w-full flex-col items-center gap-8">
@@ -72,12 +86,12 @@ export default function TranslateSubtitles({
           href={downloadFileInfos.href}
           filename={downloadFileInfos.filename}
           label={downloadFileInfos.label}
-          disabled={isPending}
+          disabled={isuploadTranslationsPending}
         />
         <UploadFileAlert
           labels={uploadLabels}
-          formAction={formAction}
-          isPending={isPending}
+          formAction={uploadTranslationsFormAction}
+          isPending={isuploadTranslationsPending}
         />
       </section>
       <SubtitlesTable
@@ -85,6 +99,14 @@ export default function TranslateSubtitles({
         translatedSubtitles={translatedSubtitles}
         language={language}
       />
+      {translatedSubtitles && language ? (
+        <CreateTranslatedFcpxmlButton
+          fcpxmlFilename={fcpxmlFilename}
+          translatedSubtitles={translatedSubtitles}
+          language={language}
+          label={createTranslatedFcpxmlLabel}
+        />
+      ) : null}
     </div>
   );
 }

@@ -16,6 +16,7 @@
     "warningLength": "red : translation is 10% longer than the original",
     "downloadExcelZip": "Export Excel files",
     "uploadTranslatedFile": "Import Translated file",
-    "selectTranslationFile": "Select the Excel file with the translations"
+    "selectTranslationFile": "Select the Excel file with the translations",
+    "createTranslatedFcpxml": "Create translated Final Cut Pro file"
   }
 }
