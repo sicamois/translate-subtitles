@@ -45,7 +45,7 @@ export async function uploadFile(
     };
   }
 
-  const encryptedFile = encrypt(file.name, process.env.KEY!);
+  const encryptedFile = encrypt(file.name);
 
   let languages: string[] = [];
 
