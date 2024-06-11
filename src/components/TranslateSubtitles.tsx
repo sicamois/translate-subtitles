@@ -1,17 +1,12 @@
 'use client';
 
-import { useActionState, useState } from 'react';
-import { uploadTranslations, createFcpxmlFile } from '@/app/actions';
+import { useState } from 'react';
 import type { Subtitle } from '@/lib/fcpxmlParser';
 import UploadFileAlert, { UploadFileAlertLabels } from './UploadFileAlert';
 import DownloadFileButton, {
   DownloadFileButtonInfos,
 } from './DownloadFileButton';
 import SubtitlesTable from './SubtitlesTable';
-import { toast } from 'sonner';
-import { useEffect } from 'react';
-import ToastContent from './ToastContent';
-import { Button } from './ui/button';
 import CreateTranslatedFcpxmlButton from './CreateTranslatedFcpxmlButton';
 
 export const languages = {
@@ -37,47 +32,8 @@ export default function TranslateSubtitles({
   uploadLabels: UploadFileAlertLabels;
   createTranslatedFcpxmlLabel: string;
 }) {
-  const uploadTranslationInitialState: {
-    translatedSubtitles?: Subtitle[];
-    language?: string;
-    message: string;
-  } = {
-    message: '',
-  };
-  const [
-    uploadTranslationsState,
-    uploadTranslationsFormAction,
-    isuploadTranslationsPending,
-  ] = useActionState(uploadTranslations, uploadTranslationInitialState);
-
   const [translatedSubtitles, setTranslatedSubtitles] = useState<Subtitle[]>();
   const [language, setLanguage] = useState<string>();
-
-  useEffect(() => {
-    const translations = uploadTranslationsState.translatedSubtitles;
-    const language = uploadTranslationsState.language;
-
-    if (uploadTranslationsState.message !== '') {
-      toast(
-        ToastContent(
-          'Problem importing Excel file',
-          uploadTranslationsState.message,
-        ),
-      );
-    } else if (translations && translations.length !== subtitles.length) {
-      setTranslatedSubtitles(undefined);
-      setLanguage(undefined);
-      toast(
-        ToastContent(
-          'Wrong number of subtitles in the Excel file',
-          `There are ${subtitles.length} subtitles in the Final Cut Pro file and ${translations?.length || 0} translated subtitles in the Excel file`,
-        ),
-      );
-    } else {
-      setTranslatedSubtitles(translations);
-      setLanguage(language);
-    }
-  }, [uploadTranslationsState, subtitles]);
 
   return (
     <div className="flex w-full flex-col items-center gap-8">
@@ -86,12 +42,12 @@ export default function TranslateSubtitles({
           href={downloadFileInfos.href}
           filename={downloadFileInfos.filename}
           label={downloadFileInfos.label}
-          disabled={isuploadTranslationsPending}
         />
         <UploadFileAlert
+          subtitlesCount={subtitles.length}
+          setTranslatedSubtitles={setTranslatedSubtitles}
+          setLanguage={setLanguage}
           labels={uploadLabels}
-          formAction={uploadTranslationsFormAction}
-          isPending={isuploadTranslationsPending}
         />
       </section>
       <SubtitlesTable

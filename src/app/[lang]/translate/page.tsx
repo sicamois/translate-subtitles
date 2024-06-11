@@ -33,9 +33,7 @@ export default async function Subtitles({
   if (!encryptedFilename || typeof encryptedFilename !== 'string') {
     notFound();
   }
-  console.log('encryptedFilename: ', encryptedFilename);
   const filename = await decrypt(encryptedFilename);
-  console.log('filename: ', filename);
 
   const { videoTitle, subtitles, url, zipFilename } =
     await exctractFCPXMLInfosAndUrl(filename, langs);

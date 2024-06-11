@@ -12,6 +12,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.583.0",
     "@aws-sdk/s3-request-presigner": "^3.583.0",
+    "@dapofactory/react-hook-upload-to-s3": "npm:@jsr/dapofactory__react-hook-upload-to-s3",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-hover-card": "^1.0.7",
     "@radix-ui/react-label": "^2.0.2",

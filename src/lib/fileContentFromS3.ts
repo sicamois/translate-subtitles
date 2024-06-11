@@ -1,3 +1,4 @@
+import 'server-only';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { cache } from 'react';
 

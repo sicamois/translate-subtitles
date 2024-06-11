@@ -1,9 +1,6 @@
-// import 'server-only';
-import {
-  PutObjectCommand,
-  PutObjectCommandOutput,
-  S3Client,
-} from '@aws-sdk/client-s3';
+'use server';
+
+import 'server-only';
 import { Workbook } from 'exceljs';
 import type { CellValue, Worksheet } from 'exceljs';
 import { Subtitle } from './fcpxmlParser';
@@ -69,10 +66,7 @@ export async function createExcelFileDataFromSubtitles(
     },
   ];
 
-  const arrayBuffer = workbook.xlsx.writeBuffer();
-  // const buffer = new Uint8Array(arrayBuffer);
-
-  return arrayBuffer;
+  return workbook.xlsx.writeBuffer();
 }
 
 export async function createZipFromSubtitles(
