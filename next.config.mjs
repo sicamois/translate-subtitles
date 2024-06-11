@@ -4,9 +4,8 @@ const nextConfig = {
   experimental: {
     reactCompiler: true,
     serverActions: {
-      bodySizeLimit: '4.5mb',
+      bodySizeLimit: '50mb',
     },
-    ppr: true,
   },
 };
 

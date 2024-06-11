@@ -1,63 +1,43 @@
 'use client';
 
-import {
-  ChangeEvent,
-  useActionState,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
-import { uploadFile } from '@/app/actions';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import Spinner from './Spinner';
 import { LabelsDictionary } from '@/app/dictionaries';
+import { useUploadToS3 } from '@dapofactory/react-hook-upload-to-s3';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { encrypt } from '@/lib/encryptionUtils';
 import { Switch } from './ui/switch';
-import { AcceptedLanguages, languages } from './TranslateSubtitles';
-import { toast } from 'sonner';
-import ToastContent from './ToastContent';
+
+const supportedLanguages = ['FRA', 'ESP', 'ARA', 'ITA', 'RUS'] as const;
 
 export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
-  const initialState: {
-    message: string;
-  } = {
-    message: '',
-  };
-
-  const [{ message }, formAction, isPending] = useActionState(
-    uploadFile,
-    initialState,
-  );
-  const formRef = useRef<HTMLFormElement>(null);
-
-  const langArray = Object.entries(languages) as [AcceptedLanguages, string][];
-  const [selectedLanguages, setSelectedLanguages] = useState<
-    AcceptedLanguages[]
+  const [languages, setLanguages] = useState<
+    (typeof supportedLanguages)[number][]
   >(['FRA', 'ESP', 'ARA']);
 
+  const [handleInputChange, s3key, isPending, error] = useUploadToS3(
+    'translate-subtitles-app-uploads',
+    'eu-west-3',
+    {
+      accept: '.fcpxml',
+      sizeLimit: 50 * 1024 * 1024,
+    },
+  );
+  const router = useRouter();
   useEffect(() => {
-    if (message !== '') {
-      formRef?.current?.reset();
-      toast(ToastContent('Error on file upload', message));
-    }
-  }, [message]);
+    if (!s3key) return;
 
-  function onFileSelected(event: ChangeEvent<HTMLInputElement>) {
-    if (!formRef.current) return;
-
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const formData = new FormData(formRef.current);
-    formAction(formData);
-  }
+    encrypt(s3key).then((encryptedFilename) =>
+      router.push(
+        `/translate?file=${encryptedFilename}&langs=${languages.join(',')}`,
+      ),
+    );
+  }, [languages, router, s3key]);
 
   return (
-    <form
-      className="m-auto flex flex-col items-center gap-4"
-      action={formAction}
-      ref={formRef}
-    >
+    <form className="m-auto flex flex-col items-center gap-4">
       <Label htmlFor="file" className="text-center">
         {labelsDict.file.selectFile}
       </Label>
@@ -66,42 +46,39 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
           className="h-24 cursor-pointer border-none p-9 text-lg text-primary"
           type="file"
           id="file"
-          name="file"
           accept=".fcpxml"
           required
-          onChange={onFileSelected}
+          onChange={handleInputChange}
+          disabled={isPending}
         />
       </div>
+      <ul className="flex items-center gap-6">
+        {supportedLanguages.map((lang) => (
+          <li key={lang} className="flex flex-col items-center">
+            <label htmlFor={lang}>{lang}</label>
+            <Switch
+              id={lang}
+              checked={languages.includes(lang)}
+              onCheckedChange={(checked) =>
+                setLanguages((prev) =>
+                  checked ? [...prev, lang] : prev.filter((l) => l !== lang),
+                )
+              }
+            />
+          </li>
+        ))}
+      </ul>
       {isPending ? (
-        <div className="flex h-8 items-center gap-2 text-lg">
+        <div className="flex h-8 items-center justify-center gap-2 text-lg">
           <Spinner />
           <p>{labelsDict.file.uploading}</p>
         </div>
       ) : null}
-      <div className="mt-8 flex justify-center gap-4">
-        {langArray.map(([key, value]) => (
-          <div key={key} className="flex flex-col gap-2">
-            <Label htmlFor={key} className="text-center">
-              {value}
-            </Label>
-            <Switch
-              id={key}
-              name={key}
-              disabled={isPending}
-              checked={selectedLanguages.includes(key)}
-              onCheckedChange={(checked) => {
-                if (checked) {
-                  setSelectedLanguages([...selectedLanguages, key]);
-                } else {
-                  setSelectedLanguages(
-                    selectedLanguages.filter((l) => l !== key),
-                  );
-                }
-              }}
-            />
-          </div>
-        ))}
-      </div>
+      {error ? (
+        <p className="text-center font-light text-red-600">
+          Error: {error.message}
+        </p>
+      ) : null}
     </form>
   );
 }
