@@ -7,7 +7,7 @@ const s3Client = new S3Client({ region: 'eu-west-3' });
 async function fileContentFromS3(s3key: string) {
   // Read the object.
   const command = new GetObjectCommand({
-    Bucket: process.env.AWS_S3_BUCKET_NAME,
+    Bucket: 'translate-subtitles-app-uploads',
     Key: s3key,
   });
 

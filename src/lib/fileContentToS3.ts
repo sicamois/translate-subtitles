@@ -9,7 +9,7 @@ export async function fileToS3(s3key: string, file: File) {
   const buffer = new Uint8Array(bytes);
 
   const command = new PutObjectCommand({
-    Bucket: process.env.AWS_S3_BUCKET_NAME,
+    Bucket: 'translate-subtitles-app-uploads',
     Key: s3key,
     Body: buffer,
   });
@@ -22,7 +22,7 @@ export default async function fileContentToS3(
   content: string | Buffer | Uint8Array | Blob | undefined,
 ) {
   const command = new PutObjectCommand({
-    Bucket: process.env.AWS_S3_BUCKET_NAME,
+    Bucket: 'translate-subtitles-app-uploads',
     Key: s3key,
     Body: content,
   });

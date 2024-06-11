@@ -23,7 +23,7 @@ export async function exctractFCPXMLInfosAndUrl(
 
     // Get a pre-signed URL to download the file.
     const getCommand = new GetObjectCommand({
-      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Bucket: 'translate-subtitles-app-uploads',
       Key: zipFilename,
     });
     const url = await getSignedUrl(s3Client, getCommand, { expiresIn: 600 });

@@ -46,7 +46,7 @@ export async function createFcpxmlFile(
 
   // Get a pre-signed URL to download the file.
   const getCommand = new GetObjectCommand({
-    Bucket: process.env.AWS_S3_BUCKET_NAME,
+    Bucket: 'translate-subtitles-app-uploads',
     Key: filename,
   });
   const url = await getSignedUrl(s3Client, getCommand, { expiresIn: 600 });
