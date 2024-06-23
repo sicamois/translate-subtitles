@@ -36,12 +36,13 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
       onUploadComplete(s3key) {
         // It's inexpensive, so we can await it
         toast.dismiss('toast-uploading');
-        toast.success('Upload complete');
-        encryptAction(s3key).then((encryptedFilename) =>
+        encryptAction(s3key).then((encryptedFilename) => {
+          setIsLoading(false);
+          toast.success('Upload complete');
           router.push(
             `/translate?file=${encryptedFilename}&langs=${languages.join(',')}`,
-          ),
-        );
+          );
+        });
       },
     },
   );

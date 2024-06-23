@@ -4,7 +4,7 @@ import { exctractFCPXML } from '@/lib/fcpxmlUtils';
 import { getDictionary } from '@/app/dictionaries';
 import type { SuppportedLocale } from '@/app/dictionaries';
 import VideoTitle from '@/app/_components/VideoTitle';
-import { Suspense, use } from 'react';
+import { Suspense } from 'react';
 import Spinner from '@/components/ui/Spinner';
 
 export default async function Subtitles({
@@ -14,15 +14,14 @@ export default async function Subtitles({
   searchParams: { [key: string]: string | string[] | undefined };
   params: { lang: SuppportedLocale };
 }) {
-  // It is inexpensive, so we can await it
   const labelsDictPromise = getDictionary(lang);
 
   const encryptedFilename = searchParams.file;
   if (!encryptedFilename || typeof encryptedFilename !== 'string') {
     notFound();
   }
-  const filename = decrypt(encryptedFilename);
-  const fcpxmlPromise = exctractFCPXML(filename);
+  const filenamePromise = decrypt(encryptedFilename);
+  // const fcpxmlPromise = exctractFCPXML(filename);
 
   return (
     <main className="flex w-full flex-col items-center gap-6 pb-20">
@@ -30,7 +29,8 @@ export default async function Subtitles({
         <Suspense fallback={<Spinner className="h-10 w-10" />}>
           <VideoTitle
             labelsDictPromise={labelsDictPromise}
-            fcpxmlPromise={fcpxmlPromise}
+            filenamePromise={filenamePromise}
+            // fcpxmlPromise={fcpxmlPromise}
           />
         </Suspense>
       </div>

@@ -2,13 +2,16 @@ import { extractVideoTitle } from '@/lib/fcpxmlParser';
 import { FCPXML } from '@/lib/fcpxmlTypes';
 import { use } from 'react';
 import { LabelsDictionary } from '../dictionaries';
+import { exctractFCPXML } from '@/lib/fcpxmlUtils';
 
 export default function VideoTitle(props: {
-  fcpxmlPromise: Promise<FCPXML>;
+  filenamePromise: Promise<string>;
+  // fcpxmlPromise: Promise<FCPXML>;
   labelsDictPromise: Promise<LabelsDictionary>;
 }) {
   const labelsDict = use(props.labelsDictPromise);
-  const fcpxml = use(props.fcpxmlPromise);
+  const filename = use(props.filenamePromise);
+  const fcpxml = use(exctractFCPXML(filename));
   const videoTitle = extractVideoTitle(fcpxml);
   return (
     <section className="flex flex-col items-center gap-2">

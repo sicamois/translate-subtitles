@@ -13,9 +13,15 @@ export function encrypt(text: string) {
 }
 
 export function decrypt(text: string) {
-  return String.fromCharCode(
-    ...text
-      .match(/.{1,2}/g)!
-      .map((e, i) => parseInt(e, 16) ^ key.charCodeAt(i % key.length) % 255),
+  return new Promise<string>((resolve) =>
+    resolve(
+      String.fromCharCode(
+        ...text
+          .match(/.{1,2}/g)!
+          .map(
+            (e, i) => parseInt(e, 16) ^ key.charCodeAt(i % key.length) % 255,
+          ),
+      ),
+    ),
   );
 }
