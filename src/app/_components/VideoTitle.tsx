@@ -3,7 +3,7 @@ import { FCPXML } from '@/lib/fcpxmlTypes';
 import { use } from 'react';
 import { LabelsDictionary } from '../dictionaries';
 
-export default function Title(props: {
+export default function VideoTitle(props: {
   fcpxmlPromise: Promise<FCPXML>;
   labelsDictPromise: Promise<LabelsDictionary>;
 }) {

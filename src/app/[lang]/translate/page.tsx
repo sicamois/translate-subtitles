@@ -3,7 +3,7 @@ import { decrypt } from '@/lib/encryptionUtils';
 import { exctractFCPXML } from '@/lib/fcpxmlUtils';
 import { getDictionary } from '@/app/dictionaries';
 import type { SuppportedLocale } from '@/app/dictionaries';
-import Title from '@/app/_components/Title';
+import VideoTitle from '@/app/_components/VideoTitle';
 import { Suspense, use } from 'react';
 import Spinner from '@/components/ui/Spinner';
 
@@ -29,7 +29,7 @@ export default async function Subtitles({
     <main className="flex w-full flex-col items-center gap-6 pb-20">
       <div className="mt-8 h-20">
         <Suspense fallback={<Spinner className="h-10 w-10" />}>
-          <Title
+          <VideoTitle
             labelsDictPromise={labelsDictPromise}
             fcpxmlPromise={fcpxmlPromise}
           />
