@@ -4,7 +4,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import Spinner from './Spinner';
 import { LabelsDictionary } from '@/app/dictionaries';
-import { useUploadToS3 } from '@dapofactory/react-hook-upload-to-s3';
+import { useUploadToS3 } from '@sicamois/use-upload-to-s3';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { encrypt } from '@/lib/encryptionUtils';
