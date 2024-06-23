@@ -5,6 +5,7 @@ import { extractFcpxml, extractNameAndSubtitles } from './fcpxmlParser';
 import { createZipFromSubtitles } from './xlsxUtils';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import fileContentFromS3 from './fileContentFromS3';
+import { cache } from 'react';
 
 export async function exctractFCPXMLInfosAndUrl(
   filename: string,
@@ -35,12 +36,10 @@ export async function exctractFCPXMLInfosAndUrl(
   }
 }
 
-export async function exctractFCPXML(filename: string) {
-  const s3Client = new S3Client({ region: 'eu-west-3' });
+async function exctractFCPXMLUncached(filename: string) {
   try {
     const content = await fileContentFromS3(filename);
     const { fcpxml } = extractFcpxml(content);
-    await new Promise((resolve) => setTimeout(resolve, 5000));
 
     return fcpxml;
   } catch (e) {
@@ -48,3 +47,5 @@ export async function exctractFCPXML(filename: string) {
     notFound();
   }
 }
+
+export const exctractFCPXML = cache(exctractFCPXMLUncached);

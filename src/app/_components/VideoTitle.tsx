@@ -1,12 +1,10 @@
 import { extractVideoTitle } from '@/lib/fcpxmlParser';
-import { FCPXML } from '@/lib/fcpxmlTypes';
 import { use } from 'react';
 import { LabelsDictionary } from '../dictionaries';
 import { exctractFCPXML } from '@/lib/fcpxmlUtils';
 
 export default function VideoTitle(props: {
   filenamePromise: Promise<string>;
-  // fcpxmlPromise: Promise<FCPXML>;
   labelsDictPromise: Promise<LabelsDictionary>;
 }) {
   const labelsDict = use(props.labelsDictPromise);

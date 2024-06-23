@@ -5,11 +5,11 @@ import { Label } from '@/components/ui/label';
 import Spinner from '@/components/ui/Spinner';
 import { LabelsDictionary } from '@/app/dictionaries';
 import { useUploadToS3 } from '@sicamois/use-upload-to-s3';
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { encryptAction } from '@/app/actions';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
+import { encrypt } from '@/lib/encryptionUtils';
 
 const supportedLanguages = ['FRA', 'ESP', 'ARA', 'ITA', 'RUS'] as const;
 
@@ -33,16 +33,15 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
             duration: 100000,
           });
       },
-      onUploadComplete(s3key) {
+      async onUploadComplete(s3key) {
         // It's inexpensive, so we can await it
+        const encryptedFilename = await encrypt(s3key);
+        router.push(
+          `/translate?file=${encryptedFilename}&langs=${languages.join(',')}`,
+        );
         toast.dismiss('toast-uploading');
-        encryptAction(s3key).then((encryptedFilename) => {
-          setIsLoading(false);
-          toast.success('Upload complete');
-          router.push(
-            `/translate?file=${encryptedFilename}&langs=${languages.join(',')}`,
-          );
-        });
+        toast.success('Upload complete');
+        setIsLoading(false);
       },
     },
   );

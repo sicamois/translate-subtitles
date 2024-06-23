@@ -54,7 +54,3 @@ export async function createFcpxmlFile(
 
   return { filename, url };
 }
-
-export async function encryptAction(text: string) {
-  return encrypt(text);
-}

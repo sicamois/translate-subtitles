@@ -1,11 +1,11 @@
 import { notFound } from 'next/navigation';
 import { decrypt } from '@/lib/encryptionUtils';
-import { exctractFCPXML } from '@/lib/fcpxmlUtils';
 import { getDictionary } from '@/app/dictionaries';
 import type { SuppportedLocale } from '@/app/dictionaries';
 import VideoTitle from '@/app/_components/VideoTitle';
 import { Suspense } from 'react';
 import Spinner from '@/components/ui/Spinner';
+import { Button } from '@/components/ui/button';
 
 export default async function Subtitles({
   searchParams,
@@ -21,7 +21,6 @@ export default async function Subtitles({
     notFound();
   }
   const filenamePromise = decrypt(encryptedFilename);
-  // const fcpxmlPromise = exctractFCPXML(filename);
 
   return (
     <main className="flex w-full flex-col items-center gap-6 pb-20">
@@ -30,9 +29,12 @@ export default async function Subtitles({
           <VideoTitle
             labelsDictPromise={labelsDictPromise}
             filenamePromise={filenamePromise}
-            // fcpxmlPromise={fcpxmlPromise}
           />
         </Suspense>
+      </div>
+      <div className="grid grid-cols-2 justify-center gap-4">
+        <Button>Bouton 1</Button>
+        <Button>Bouton 2</Button>
       </div>
     </main>
   );
