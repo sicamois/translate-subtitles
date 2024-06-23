@@ -10,7 +10,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
-import { useUploadToS3 } from '@dapofactory/react-hook-upload-to-s3';
+import { useUploadToS3 } from '@sicamois/use-upload-to-s3';
 import {
   Dispatch,
   SetStateAction,
