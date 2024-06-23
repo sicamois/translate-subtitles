@@ -22,7 +22,6 @@ export default async function Subtitles({
     notFound();
   }
   const filename = decrypt(encryptedFilename);
-
   const fcpxmlPromise = exctractFCPXML(filename);
 
   return (
