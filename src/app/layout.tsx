@@ -35,21 +35,19 @@ export default async function RootLayout({
     <html lang={params.lang}>
       <body
         className={cn(
-          'min-h-screen bg-background font-sans antialiased',
+          'grid-row-[auto,1fr] h-screen w-screen min-w-0 items-center justify-center bg-background font-sans antialiased',
           fontSans.variable,
         )}
       >
-        <div className="flex min-h-screen w-full max-w-full flex-col items-center justify-items-center font-sans">
-          <header className="sticky inset-0 z-50 flex w-full">
-            <p className="w-full bg-muted p-2 text-center text-2xl text-muted-foreground sm:text-4xl">
-              Translate Subtitles
-            </p>
-          </header>
+        <nav className="flex shrink-0 justify-center bg-muted p-2 text-center text-2xl text-muted-foreground sm:text-4xl">
+          <p>Translate Subtitles</p>
+        </nav>
+        <div className="shrink">
           {children}
           <Toaster />
+          <SpeedInsights />
+          <Analytics />
         </div>
-        <SpeedInsights />
-        <Analytics />
       </body>
     </html>
   );
