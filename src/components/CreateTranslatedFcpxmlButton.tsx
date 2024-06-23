@@ -2,7 +2,7 @@ import { Subtitle } from '@/lib/fcpxmlParser';
 import { useTransition } from 'react';
 import { createFcpxmlFile } from '@/app/actions';
 import { Button } from './ui/button';
-import Spinner from './Spinner';
+import Spinner from './ui/Spinner';
 
 export default function CreateTranslatedFcpxmlButton({
   fcpxmlFilename,

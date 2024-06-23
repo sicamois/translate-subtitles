@@ -79,6 +79,30 @@ export function extractFcpxml(fcpxmlData: string) {
   return parser.parse(fcpxmlData) as { fcpxml: FCPXML };
 }
 
+function extractProject(fcpxml: FCPXML) {
+  const events = fcpxml.library?.event;
+
+  if (events === undefined) {
+    throw new Error('No event found in the fcpxml file');
+  }
+
+  const mainEvent = events[0];
+  const projects = mainEvent.project;
+
+  if (projects === undefined) {
+    throw new Error('No project found in the fcpxml file');
+  }
+
+  return projects[0];
+}
+
+export function extractVideoTitle(fcpxml: FCPXML) {
+  const project = extractProject(fcpxml);
+  const videoTitle = project['@_name'];
+
+  return videoTitle;
+}
+
 export function extractNameAndSubtitles(
   fcpxmlData: string,
 ): [string | undefined, Subtitle[]] {

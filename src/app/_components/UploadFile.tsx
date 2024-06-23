@@ -1,14 +1,14 @@
 'use client';
 
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import Spinner from './Spinner';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import Spinner from '@/components/ui/Spinner';
 import { LabelsDictionary } from '@/app/dictionaries';
 import { useUploadToS3 } from '@sicamois/use-upload-to-s3';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { encrypt } from '@/lib/encryptionUtils';
-import { Switch } from './ui/switch';
+import { encryptAction } from '@/app/actions';
+import { Switch } from '@/components/ui/switch';
 
 const supportedLanguages = ['FRA', 'ESP', 'ARA', 'ITA', 'RUS'] as const;
 
@@ -25,7 +25,8 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
       accept: '.fcpxml',
       sizeLimit: 50 * 1024 * 1024,
       onUploadCompleteClient(s3key) {
-        encrypt(s3key).then((encryptedFilename) =>
+        // It's inexpensive, so we can await it
+        encryptAction(s3key).then((encryptedFilename) =>
           router.push(
             `/translate?file=${encryptedFilename}&langs=${languages.join(',')}`,
           ),

@@ -1,9 +1,8 @@
-'use server';
 import 'server-only';
 
 const key = process.env.ENCRYPTION_KEY!;
 
-export async function encrypt(text: string) {
+export function encrypt(text: string) {
   return [...text]
     .map((x, i) =>
       (x.codePointAt(0)! ^ key.charCodeAt(i % key.length) % 255)
@@ -13,7 +12,7 @@ export async function encrypt(text: string) {
     .join('');
 }
 
-export async function decrypt(text: string) {
+export function decrypt(text: string) {
   return String.fromCharCode(
     ...text
       .match(/.{1,2}/g)!

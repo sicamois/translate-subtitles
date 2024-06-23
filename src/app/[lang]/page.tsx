@@ -1,6 +1,6 @@
 import { getDictionary } from '../dictionaries';
 import type { SuppportedLocale } from '@/app/dictionaries';
-import { UploadFile } from '@/components/UploadFile';
+import { UploadFile } from '../_components/UploadFile';
 
 export default async function Home({
   params: { lang },

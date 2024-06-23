@@ -7,6 +7,7 @@ import { XMLBuilder } from 'fast-xml-parser';
 import fileContentToS3 from '@/lib/fileContentToS3';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { encrypt } from '@/lib/encryptionUtils';
 
 export async function createFcpxmlFile(
   fcpxmlFilename: string,
@@ -52,4 +53,8 @@ export async function createFcpxmlFile(
   const url = await getSignedUrl(s3Client, getCommand, { expiresIn: 600 });
 
   return { filename, url };
+}
+
+export async function encryptAction(text: string) {
+  return encrypt(text);
 }
