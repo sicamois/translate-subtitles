@@ -40,6 +40,7 @@ export async function exctractFCPXML(filename: string) {
   try {
     const content = await fileContentFromS3(filename);
     const { fcpxml } = extractFcpxml(content);
+    await new Promise((resolve) => setTimeout(resolve, 5000));
 
     return fcpxml;
   } catch (e) {
