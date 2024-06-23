@@ -5,10 +5,11 @@ import { Label } from '@/components/ui/label';
 import Spinner from '@/components/ui/Spinner';
 import { LabelsDictionary } from '@/app/dictionaries';
 import { useUploadToS3 } from '@sicamois/use-upload-to-s3';
-import { useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { encryptAction } from '@/app/actions';
 import { Switch } from '@/components/ui/switch';
+import { toast } from 'sonner';
 
 const supportedLanguages = ['FRA', 'ESP', 'ARA', 'ITA', 'RUS'] as const;
 
@@ -17,6 +18,7 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
   const [languages, setLanguages] = useState<
     (typeof supportedLanguages)[number][]
   >(['FRA', 'ESP', 'ARA']);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [handleInputChange, s3key, isPending, error] = useUploadToS3(
     'translate-subtitles-app-uploads',
@@ -24,8 +26,17 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
     {
       accept: '.fcpxml',
       sizeLimit: 50 * 1024 * 1024,
-      onUploadCompleteClient(s3key) {
+      onUploadStart: () => {
+        setIsLoading(true),
+          toast.info('Uploading...', {
+            id: 'toast-uploading',
+            duration: 100000,
+          });
+      },
+      onUploadComplete(s3key) {
         // It's inexpensive, so we can await it
+        toast.dismiss('toast-uploading');
+        toast.success('Upload complete');
         encryptAction(s3key).then((encryptedFilename) =>
           router.push(
             `/translate?file=${encryptedFilename}&langs=${languages.join(',')}`,
@@ -34,6 +45,12 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
       },
     },
   );
+
+  useEffect(() => {
+    if (error !== null) {
+      setIsLoading(false);
+    }
+  }, [error]);
 
   return (
     <form className="m-auto flex flex-col items-center gap-4">
@@ -48,7 +65,7 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
           accept=".fcpxml"
           required
           onChange={handleInputChange}
-          disabled={isPending}
+          disabled={isLoading}
         />
       </div>
       <ul className="flex items-center gap-6">
@@ -58,6 +75,7 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
             <Switch
               id={lang}
               checked={languages.includes(lang)}
+              disabled={isLoading}
               onCheckedChange={(checked) =>
                 setLanguages((prev) =>
                   checked ? [...prev, lang] : prev.filter((l) => l !== lang),
@@ -67,7 +85,7 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
           </li>
         ))}
       </ul>
-      {isPending ? (
+      {isLoading ? (
         <div className="flex h-8 items-center justify-center gap-2 text-lg">
           <Spinner />
           <p>{labelsDict.file.uploading}</p>
