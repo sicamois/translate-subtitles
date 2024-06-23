@@ -15,7 +15,7 @@ export default async function Subtitles({
   params: { lang: SuppportedLocale };
 }) {
   // It is inexpensive, so we can await it
-  const labelsDict = await getDictionary(lang);
+  // const labelsDict = await getDictionary(lang);
 
   const encryptedFilename = searchParams.file;
   if (!encryptedFilename || typeof encryptedFilename !== 'string') {
@@ -33,9 +33,9 @@ export default async function Subtitles({
             <Title fcpxml={fcpxml} />
           </Suspense>
         </div>
-        <h2 className="text-center text-xl font-extralight drop-shadow-sm">
+        {/* <h2 className="text-center text-xl font-extralight drop-shadow-sm">
           {labelsDict.translate.translateSubtitles}
-        </h2>
+        </h2> */}
       </section>
     </main>
   );
