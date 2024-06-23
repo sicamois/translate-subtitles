@@ -35,11 +35,11 @@ export default async function RootLayout({
     <html lang={params.lang}>
       <body
         className={cn(
-          'grid-row-[auto,1fr] h-screen w-screen min-w-0 items-center justify-center bg-background font-sans antialiased',
+          'grid-row-[auto,1fr] align-items-start grid h-screen w-screen min-w-0 bg-background font-sans antialiased',
           fontSans.variable,
         )}
       >
-        <nav className="flex shrink-0 justify-center bg-muted p-2 text-center text-2xl text-muted-foreground sm:text-4xl">
+        <nav className="flex w-screen shrink-0 justify-center bg-muted p-2 text-center text-2xl text-muted-foreground sm:text-4xl">
           <p>Translate Subtitles</p>
         </nav>
         <div className="shrink">
