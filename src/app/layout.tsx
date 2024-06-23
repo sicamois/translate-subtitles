@@ -35,7 +35,7 @@ export default async function RootLayout({
     <html lang={params.lang}>
       <body
         className={cn(
-          'grid-row-[auto,1fr] grid h-screen w-screen min-w-0 content-start bg-background font-sans antialiased',
+          'grid-row-[auto,1fr] grid h-screen w-screen min-w-0 content-start gap-8 bg-background font-sans antialiased',
           fontSans.variable,
         )}
       >

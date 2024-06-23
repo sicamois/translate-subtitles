@@ -24,7 +24,7 @@ export default async function Subtitles({
 
   return (
     <main className="flex w-full flex-col items-center gap-6 pb-20">
-      <div className="mt-8 h-20">
+      <div className="h-20">
         <Suspense fallback={<Spinner className="h-10 w-10" />}>
           <VideoTitle
             labelsDictPromise={labelsDictPromise}
