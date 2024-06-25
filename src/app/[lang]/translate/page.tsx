@@ -6,6 +6,11 @@ import VideoTitle from '@/app/_components/VideoTitle';
 import { Suspense } from 'react';
 import Spinner from '@/components/ui/Spinner';
 import { Button } from '@/components/ui/button';
+import DownloadZipFilesButton from '@/app/_components/DownloadZipFilesButton';
+import UploadFileAlert from '@/app/_components/UploadFileAlert';
+import SubtitlesView from '@/app/_components/SubtitlesView';
+import { extractSubtitles, extractVideoTitle } from '@/lib/fcpxmlParser';
+import { createZipFromSubtitles } from '@/lib/xlsxUtils';
 
 export default async function Subtitles({
   searchParams,
@@ -14,28 +19,39 @@ export default async function Subtitles({
   searchParams: { [key: string]: string | string[] | undefined };
   params: { lang: SuppportedLocale };
 }) {
-  const labelsDictPromise = getDictionary(lang);
-
   const encryptedFilename = searchParams.file;
   if (!encryptedFilename || typeof encryptedFilename !== 'string') {
     notFound();
   }
-  const filenamePromise = decrypt(encryptedFilename);
+
+  const langsParam = searchParams.langs;
+  if (!langsParam || typeof langsParam !== 'string') {
+    notFound();
+  }
+  const langs = langsParam.split(',');
+
+  const filename = await decrypt(encryptedFilename);
+  const videoTitle = await extractVideoTitle(filename);
+  const subtitles = await extractSubtitles(filename);
+  const { url, zipFilename } = await createZipFromSubtitles(
+    subtitles,
+    videoTitle,
+    langs,
+  );
+  const labelsDict = await getDictionary(lang);
 
   return (
     <main className="flex w-full flex-col items-center gap-6 pb-20">
-      <div className="h-20">
-        <Suspense fallback={<Spinner className="h-10 w-10" />}>
-          <VideoTitle
-            labelsDictPromise={labelsDictPromise}
-            filenamePromise={filenamePromise}
-          />
-        </Suspense>
-      </div>
-      <div className="grid grid-cols-2 justify-center gap-4">
-        <Button>Bouton 1</Button>
-        <Button>Bouton 2</Button>
-      </div>
+      <VideoTitle labelsDict={labelsDict} videoTitle={videoTitle} />
+      <SubtitlesView
+        filename={filename}
+        labelsDict={labelsDict}
+        subtitles={subtitles}
+        videoTitle={videoTitle}
+        zipFilename={zipFilename}
+        zipUrl={url}
+        langs={langs}
+      />
     </main>
   );
 }

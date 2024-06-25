@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -14,6 +16,7 @@ import { useUploadToS3 } from '@sicamois/use-upload-to-s3';
 import {
   Dispatch,
   SetStateAction,
+  use,
   useEffect,
   useRef,
   useState,
@@ -21,6 +24,7 @@ import {
 } from 'react';
 import { Subtitle } from '@/lib/fcpxmlParser';
 import { importExcelFile } from '@/lib/xlsxUtils';
+import { LabelsDictionary } from '../dictionaries';
 
 export type UploadFileAlertLabels = {
   alertTrigger: string;
@@ -34,14 +38,14 @@ export default function UploadFileAlert({
   subtitlesCount,
   setTranslatedSubtitles,
   setLanguage,
-  labels,
+  labelsDict,
 }: {
   subtitlesCount: number;
   setTranslatedSubtitles: (
     value: SetStateAction<Subtitle[] | undefined>,
   ) => void;
   setLanguage: Dispatch<SetStateAction<string | undefined>>;
-  labels: UploadFileAlertLabels;
+  labelsDict: LabelsDictionary;
 }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -93,15 +97,19 @@ export default function UploadFileAlert({
           size={'lg'}
           disabled={isPending}
         >
-          <p className="font-semibold drop-shadow">{labels.alertTrigger}</p>
+          <p className="font-semibold drop-shadow">
+            {labelsDict.translate.uploadTranslatedFile}
+          </p>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent asChild>
         <form>
           <AlertDialogHeader>
-            <AlertDialogTitle>{labels.alertTitle}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {labelsDict.translate.uploadTranslatedFile}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              {labels.alertDescription}
+              {labelsDict.translate.selectTranslationFile}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex flex-col items-center gap-4">
@@ -124,7 +132,7 @@ export default function UploadFileAlert({
             ) : null}
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel>{labels.cancel}</AlertDialogCancel>
+            <AlertDialogCancel>{labelsDict.file.cancel}</AlertDialogCancel>
           </AlertDialogFooter>
         </form>
       </AlertDialogContent>

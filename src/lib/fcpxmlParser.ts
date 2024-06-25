@@ -2,6 +2,8 @@ import 'server-only';
 
 import { XMLParser } from 'fast-xml-parser';
 import type { Title as FCPTitle, FCPXML } from './fcpxmlTypes';
+import { cache } from 'react';
+import fileContentFromS3 from './fileContentFromS3';
 
 export type Subtitle = {
   ref?: string;
@@ -12,27 +14,7 @@ export type Subtitle = {
   }[];
 };
 
-function extractTitleElements(element: any): FCPTitle[] {
-  let titles: FCPTitle[] = [];
-
-  if (element.title) {
-    titles.push(...element.title);
-  }
-
-  for (const key in element) {
-    if (Array.isArray(element[key])) {
-      for (const subElement of element[key]) {
-        titles.push(...extractTitleElements(subElement));
-      }
-    } else if (typeof element[key] === 'object') {
-      titles.push(...extractTitleElements(element[key]));
-    }
-  }
-
-  return titles;
-}
-
-export function extractFcpxml(fcpxmlData: string) {
+export function parseFCPXML(fcpxmlData: string) {
   const alwaysArray = [
     'event',
     'project',
@@ -79,6 +61,14 @@ export function extractFcpxml(fcpxmlData: string) {
   return parser.parse(fcpxmlData) as { fcpxml: FCPXML };
 }
 
+export const exctractFCPXML = async (filename: string) => {
+  const content = await fileContentFromS3(filename);
+  const { fcpxml } = parseFCPXML(content);
+  await setTimeout(() => {}, 5000);
+
+  return fcpxml;
+};
+
 function extractProject(fcpxml: FCPXML) {
   const events = fcpxml.library?.event;
 
@@ -96,39 +86,41 @@ function extractProject(fcpxml: FCPXML) {
   return projects[0];
 }
 
-export function extractVideoTitle(fcpxml: FCPXML) {
+export async function extractVideoTitle(fcpxmlFilename: string) {
+  const fcpxml = await exctractFCPXML(fcpxmlFilename);
   const project = extractProject(fcpxml);
   const videoTitle = project['@_name'];
+
+  if (videoTitle === undefined) {
+    throw new Error('No video title found in the fcpxml file');
+  }
 
   return videoTitle;
 }
 
-export function extractNameAndSubtitles(
-  fcpxmlData: string,
-): [string | undefined, Subtitle[]] {
-  const { fcpxml } = extractFcpxml(fcpxmlData);
+export function extractTitleElements(element: any): FCPTitle[] {
+  let titles: FCPTitle[] = [];
 
-  const events = fcpxml.library?.event;
-
-  if (events === undefined) {
-    throw new Error('No event found in the fcpxml file');
+  if (element.title) {
+    titles.push(...element.title);
   }
 
-  const mainEvent = events[0];
-  const projects = mainEvent.project;
-
-  if (projects === undefined) {
-    throw new Error('No project found in the fcpxml file');
+  for (const key in element) {
+    if (Array.isArray(element[key])) {
+      for (const subElement of element[key]) {
+        titles.push(...extractTitleElements(subElement));
+      }
+    } else if (typeof element[key] === 'object') {
+      titles.push(...extractTitleElements(element[key]));
+    }
   }
 
-  const project = projects[0];
-  const videoTitle = project['@_name'];
+  return titles;
+}
 
-  const titles = extractTitleElements(project);
-
-  if (titles.length === 0) {
-    throw new Error('No titles found in the fcpxml file');
-  }
+export async function extractSubtitles(fcpxmlFilename: string) {
+  const fcpxml = await exctractFCPXML(fcpxmlFilename);
+  const titles = extractTitleElements(fcpxml);
 
   const subtitles: Subtitle[] = [];
 
@@ -167,73 +159,72 @@ export function extractNameAndSubtitles(
       }
     });
   }
-
-  return [videoTitle, subtitles];
+  return subtitles;
 }
 
 export function replaceSubtitlesInFCPXML(
-  fcpxmlData: { fcpxml: FCPXML },
+  fcpxml: FCPXML,
   subtitles: Subtitle[],
 ) {
-  replaceSubtitles(fcpxmlData, subtitles);
-  return fcpxmlData;
-}
-let index = 0;
-function replaceSubtitles(element: any, subtitles: Subtitle[]) {
-  if (index > subtitles.length) {
-    throw new Error(
-      `Not enough subtitles to replace - index: ${index} - subtitles length: ${subtitles.length}`,
-    );
-  }
-  if ('title' in element) {
-    const titles = element.title as FCPTitle[];
-    for (const title of titles) {
-      if (title.text) {
-        title.text.forEach((aText) => {
-          switch (true) {
-            case aText['#text'] !== undefined: {
-              if (subtitles[index].titles.length !== 1) {
-                throw new Error(
-                  `Too many subtitles to replace - index: ${index} - subtitles length: ${subtitles.length}
-subtitles: ${JSON.stringify(subtitles[index], null, 2)}
-text styles: ${JSON.stringify(aText['text-style'], null, 2)}`,
-                );
-              }
-              aText['#text'] = subtitles[index].titles[0].text;
-              index++;
-              return;
-            }
-            case aText['text-style'] !== undefined: {
-              let textStyleIndex = 0;
-              aText['text-style'].forEach((textStyle) => {
-                if (textStyleIndex >= subtitles[index].titles.length) {
+  let index = 0;
+  function replaceSubtitles(element: any, subtitles: Subtitle[]) {
+    if (index > subtitles.length) {
+      throw new Error(
+        `Not enough subtitles to replace - index: ${index} - subtitles length: ${subtitles.length}`,
+      );
+    }
+    if ('title' in element) {
+      const titles = element.title as FCPTitle[];
+      for (const title of titles) {
+        if (title.text) {
+          title.text.forEach((aText) => {
+            switch (true) {
+              case aText['#text'] !== undefined: {
+                if (subtitles[index].titles.length !== 1) {
                   throw new Error(
-                    `Too many text styles to replace - index: ${index} - text styles length: ${textStyleIndex + 1} - subtitles length: ${subtitles[index].titles.length}
+                    `Too many subtitles to replace - index: ${index} - subtitles length: ${subtitles.length}
 subtitles: ${JSON.stringify(subtitles[index], null, 2)}
 text styles: ${JSON.stringify(aText['text-style'], null, 2)}`,
                   );
                 }
-                textStyle['#text'] =
-                  subtitles[index].titles[textStyleIndex].text;
-                textStyleIndex++;
-              });
-              index++;
-              return;
+                aText['#text'] = subtitles[index].titles[0].text;
+                index++;
+                return;
+              }
+              case aText['text-style'] !== undefined: {
+                let textStyleIndex = 0;
+                aText['text-style'].forEach((textStyle) => {
+                  if (textStyleIndex >= subtitles[index].titles.length) {
+                    throw new Error(
+                      `Too many text styles to replace - index: ${index} - text styles length: ${textStyleIndex + 1} - subtitles length: ${subtitles[index].titles.length}
+subtitles: ${JSON.stringify(subtitles[index], null, 2)}
+text styles: ${JSON.stringify(aText['text-style'], null, 2)}`,
+                    );
+                  }
+                  textStyle['#text'] =
+                    subtitles[index].titles[textStyleIndex].text;
+                  textStyleIndex++;
+                });
+                index++;
+                return;
+              }
             }
-          }
-        });
+          });
+        }
       }
     }
-  }
 
-  for (const key in element) {
-    if (Array.isArray(element[key])) {
-      for (const subElement of element[key]) {
-        replaceSubtitles(subElement, subtitles);
+    for (const key in element) {
+      if (Array.isArray(element[key])) {
+        for (const subElement of element[key]) {
+          replaceSubtitles(subElement, subtitles);
+        }
+        // null is of type object !!!
+      } else if (typeof element[key] === 'object') {
+        replaceSubtitles(element[key], subtitles);
       }
-      // null is of type object !!!
-    } else if (typeof element[key] === 'object') {
-      replaceSubtitles(element[key], subtitles);
     }
   }
+  replaceSubtitles(fcpxml, subtitles);
+  return fcpxml;
 }
