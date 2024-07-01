@@ -4,8 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Spinner from '@/components/ui/Spinner';
 import { LabelsDictionary } from '@/app/dictionaries';
-import { useUploadToS3 } from '@sicamois/use-upload-to-s3';
-import { useEffect, useState } from 'react';
+import { useUploadToS3 } from 'use-upload-to-s3';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
@@ -22,19 +22,12 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
 
   const [handleInputChange, s3key, isPending, error] = useUploadToS3(
     'translate-subtitles-app-uploads',
-    'eu-west-3',
     {
       accept: '.fcpxml',
-      sizeLimit: 50 * 1024 * 1024,
-      onUploadStart: () => {
-        setIsLoading(true),
-          toast.info('Uploading...', {
-            id: 'toast-uploading',
-            duration: 100000,
-          });
-      },
+      sizeLimit: '50mb',
       async onUploadComplete(s3key) {
         // It's inexpensive, so we can await it
+        console.log('s3key', s3key);
         const encryptedFilename = await encrypt(s3key);
         router.push(
           `/translate?file=${encryptedFilename}&langs=${languages.join(',')}`,
@@ -52,6 +45,14 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
     }
   }, [error]);
 
+  async function customHandleInputChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]!;
+    console.log(file.name, file.size, file.type);
+    console.log('test', file.type === '');
+    console.log('origin', window.location.host);
+    handleInputChange(event);
+  }
+
   return (
     <form className="m-auto flex flex-col items-center gap-4">
       <Label htmlFor="file" className="text-center">
@@ -64,7 +65,7 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
           id="file"
           accept=".fcpxml"
           required
-          onChange={handleInputChange}
+          onChange={customHandleInputChange}
           disabled={isLoading}
         />
       </div>

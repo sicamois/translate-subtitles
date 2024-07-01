@@ -12,7 +12,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
-import { useUploadToS3 } from '@sicamois/use-upload-to-s3';
+import { useUploadToS3 } from 'use-upload-to-s3';
 import {
   Dispatch,
   SetStateAction,
@@ -53,10 +53,9 @@ export default function UploadFileAlert({
   const [isPending, startTransition] = useTransition();
   const [handleInputChange, s3key, isUploading, uploadError] = useUploadToS3(
     'translate-subtitles-app-uploads',
-    'eu-west-3',
     {
       accept: '.xlsx',
-      sizeLimit: 50 * 1024 * 1024,
+      sizeLimit: '50mb',
     },
   );
 

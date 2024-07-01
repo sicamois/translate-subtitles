@@ -3,11 +3,6 @@ import { decrypt } from '@/lib/encryptionUtils';
 import { getDictionary } from '@/app/dictionaries';
 import type { SuppportedLocale } from '@/app/dictionaries';
 import VideoTitle from '@/app/_components/VideoTitle';
-import { Suspense } from 'react';
-import Spinner from '@/components/ui/Spinner';
-import { Button } from '@/components/ui/button';
-import DownloadZipFilesButton from '@/app/_components/DownloadZipFilesButton';
-import UploadFileAlert from '@/app/_components/UploadFileAlert';
 import SubtitlesView from '@/app/_components/SubtitlesView';
 import { extractSubtitles, extractVideoTitle } from '@/lib/fcpxmlParser';
 import { createZipFromSubtitles } from '@/lib/xlsxUtils';
@@ -31,6 +26,7 @@ export default async function Subtitles({
   const langs = langsParam.split(',');
 
   const filename = await decrypt(encryptedFilename);
+  console.log('filename', filename);
   const videoTitle = await extractVideoTitle(filename);
   const subtitles = await extractSubtitles(filename);
   const { url, zipFilename } = await createZipFromSubtitles(
