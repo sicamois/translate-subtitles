@@ -2,8 +2,8 @@ import { notFound } from 'next/navigation';
 import { decrypt } from '@/lib/encryptionUtils';
 import { getDictionary } from '@/app/dictionaries';
 import type { SuppportedLocale } from '@/app/dictionaries';
-import VideoTitle from '@/app/_components/VideoTitle';
-import SubtitlesView from '@/app/_components/SubtitlesView';
+import VideoTitle from './_components/VideoTitle';
+import SubtitlesView from './_components/SubtitlesView';
 import { extractSubtitles, extractVideoTitle } from '@/lib/fcpxmlParser';
 import { createZipFromSubtitles } from '@/lib/xlsxUtils';
 

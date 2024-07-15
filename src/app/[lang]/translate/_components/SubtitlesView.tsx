@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { LabelsDictionary } from '../dictionaries';
+import { LabelsDictionary } from '@/app/dictionaries';
 import DownloadZipFilesButton from './DownloadZipFilesButton';
 import UploadFileAlert from './UploadFileAlert';
 import { Subtitle } from '@/lib/fcpxmlParser';

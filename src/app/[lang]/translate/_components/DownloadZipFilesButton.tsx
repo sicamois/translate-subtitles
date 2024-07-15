@@ -1,5 +1,5 @@
 import { use } from 'react';
-import { LabelsDictionary } from '../dictionaries';
+import { LabelsDictionary } from '@/app/dictionaries';
 import { createZipFromSubtitles } from '@/lib/xlsxUtils';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';

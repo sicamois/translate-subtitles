@@ -1,4 +1,4 @@
-import { LabelsDictionary } from '../dictionaries';
+import { LabelsDictionary } from '@/app/dictionaries';
 
 export default function VideoTitle(props: {
   videoTitle: string;
