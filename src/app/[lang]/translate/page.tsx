@@ -26,7 +26,6 @@ export default async function Subtitles({
   const langs = langsParam.split(',');
 
   const filename = await decrypt(encryptedFilename);
-  console.log('filename', filename);
   const videoTitle = await extractVideoTitle(filename);
   const subtitles = await extractSubtitles(filename);
   const { url, zipFilename } = await createZipFromSubtitles(
