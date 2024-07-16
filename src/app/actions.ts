@@ -39,8 +39,10 @@ export async function createFcpxmlFile(
     '<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE fcpxml>\n',
   );
   const cleanXmlDataStr = xmlDataStrWithDocType.replace(/&apos;/g, "'");
-
-  const filename = `${fcpxmlFilename.replace('.fcpxml', '')} (SUB ${language}).fcpxml`;
+  const filenameParts = fcpxmlFilename.split('-');
+  // Remove uuid prefix in file name
+  filenameParts.shift();
+  const filename = `${filenameParts.join('-').replace('.fcpxml', '')} (SUB ${language}).fcpxml`;
 
   try {
     await fileContentToS3(filename, cleanXmlDataStr);

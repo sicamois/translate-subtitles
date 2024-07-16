@@ -24,7 +24,7 @@ import {
 } from 'react';
 import { Subtitle } from '@/lib/fcpxmlParser';
 import { importExcelFile } from '@/lib/xlsxUtils';
-import { LabelsDictionary } from '../dictionaries';
+import { LabelsDictionary } from '@/app/dictionaries';
 
 export type UploadFileAlertLabels = {
   alertTrigger: string;
