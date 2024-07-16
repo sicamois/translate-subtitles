@@ -20,10 +20,10 @@ export async function createFcpxmlFile(
   translatedSubtitles: Subtitle[],
   language: string,
 ) {
-  const fcpxml = await exctractFCPXML(fcpxmlFilename);
+  const xml = await exctractFCPXML(fcpxmlFilename);
 
   const translatedFcpxmlData = replaceSubtitlesInFCPXML(
-    fcpxml,
+    xml,
     translatedSubtitles,
   );
 

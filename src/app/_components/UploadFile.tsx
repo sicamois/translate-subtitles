@@ -27,7 +27,6 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
       sizeLimit: '50mb',
       async onUploadComplete(s3key) {
         // It's inexpensive, so we can await it
-        console.log('s3key', s3key);
         const encryptedFilename = await encrypt(s3key);
         router.push(
           `/translate?file=${encryptedFilename}&langs=${languages.join(',')}`,
@@ -47,9 +46,6 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
 
   async function customHandleInputChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]!;
-    console.log(file.name, file.size, file.type);
-    console.log('test', file.type === '');
-    console.log('origin', window.location.host);
     handleInputChange(event);
   }
 

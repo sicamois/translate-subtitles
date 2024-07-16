@@ -58,15 +58,13 @@ export function parseFCPXML(fcpxmlData: string) {
   };
 
   const parser = new XMLParser(options);
+  const content = parser.parse(fcpxmlData);
   return parser.parse(fcpxmlData) as { fcpxml: FCPXML };
 }
 
 export const exctractFCPXML = async (filename: string) => {
   const content = await fileContentFromS3(filename);
-  const { fcpxml } = parseFCPXML(content);
-  await setTimeout(() => {}, 5000);
-
-  return fcpxml;
+  return parseFCPXML(content);
 };
 
 function extractProject(fcpxml: FCPXML) {
@@ -87,7 +85,7 @@ function extractProject(fcpxml: FCPXML) {
 }
 
 export async function extractVideoTitle(fcpxmlFilename: string) {
-  const fcpxml = await exctractFCPXML(fcpxmlFilename);
+  const { fcpxml } = await exctractFCPXML(fcpxmlFilename);
   const project = extractProject(fcpxml);
   const videoTitle = project['@_name'];
 
@@ -119,7 +117,7 @@ export function extractTitleElements(element: any): FCPTitle[] {
 }
 
 export async function extractSubtitles(fcpxmlFilename: string) {
-  const fcpxml = await exctractFCPXML(fcpxmlFilename);
+  const { fcpxml } = await exctractFCPXML(fcpxmlFilename);
   const titles = extractTitleElements(fcpxml);
 
   const subtitles: Subtitle[] = [];
@@ -163,7 +161,7 @@ export async function extractSubtitles(fcpxmlFilename: string) {
 }
 
 export function replaceSubtitlesInFCPXML(
-  fcpxml: FCPXML,
+  xml: { fcpxml: FCPXML },
   subtitles: Subtitle[],
 ) {
   let index = 0;
@@ -225,6 +223,6 @@ text styles: ${JSON.stringify(aText['text-style'], null, 2)}`,
       }
     }
   }
-  replaceSubtitles(fcpxml, subtitles);
-  return fcpxml;
+  replaceSubtitles(xml, subtitles);
+  return xml;
 }
