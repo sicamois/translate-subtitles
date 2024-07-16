@@ -1,40 +1,53 @@
 'use client';
 
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import Spinner from './Spinner';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import Spinner from '@/components/ui/Spinner';
 import { LabelsDictionary } from '@/app/dictionaries';
-import { useUploadToS3 } from '@sicamois/use-upload-to-s3';
-import { useEffect, useState } from 'react';
+import { useUploadToS3 } from 'use-upload-to-s3';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Switch } from '@/components/ui/switch';
+import { toast } from 'sonner';
 import { encrypt } from '@/lib/encryptionUtils';
-import { Switch } from './ui/switch';
 
 const supportedLanguages = ['FRA', 'ESP', 'ARA', 'ITA', 'RUS'] as const;
 
 export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
+  const router = useRouter();
   const [languages, setLanguages] = useState<
     (typeof supportedLanguages)[number][]
   >(['FRA', 'ESP', 'ARA']);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [handleInputChange, s3key, isPending, error] = useUploadToS3(
     'translate-subtitles-app-uploads',
-    'eu-west-3',
     {
       accept: '.fcpxml',
-      sizeLimit: 50 * 1024 * 1024,
+      sizeLimit: '50mb',
+      async onUploadComplete(s3key) {
+        // It's inexpensive, so we can await it
+        const encryptedFilename = await encrypt(s3key);
+        router.push(
+          `/translate?file=${encryptedFilename}&langs=${languages.join(',')}`,
+        );
+        toast.dismiss('toast-uploading');
+        toast.success('Upload complete');
+        setIsLoading(false);
+      },
     },
   );
-  const router = useRouter();
-  useEffect(() => {
-    if (!s3key) return;
 
-    encrypt(s3key).then((encryptedFilename) =>
-      router.push(
-        `/translate?file=${encryptedFilename}&langs=${languages.join(',')}`,
-      ),
-    );
-  }, [languages, router, s3key]);
+  useEffect(() => {
+    if (error !== null) {
+      setIsLoading(false);
+    }
+  }, [error]);
+
+  async function customHandleInputChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]!;
+    handleInputChange(event);
+  }
 
   return (
     <form className="m-auto flex flex-col items-center gap-4">
@@ -48,8 +61,8 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
           id="file"
           accept=".fcpxml"
           required
-          onChange={handleInputChange}
-          disabled={isPending}
+          onChange={customHandleInputChange}
+          disabled={isLoading}
         />
       </div>
       <ul className="flex items-center gap-6">
@@ -59,6 +72,7 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
             <Switch
               id={lang}
               checked={languages.includes(lang)}
+              disabled={isLoading}
               onCheckedChange={(checked) =>
                 setLanguages((prev) =>
                   checked ? [...prev, lang] : prev.filter((l) => l !== lang),
@@ -68,7 +82,7 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
           </li>
         ))}
       </ul>
-      {isPending ? (
+      {isLoading ? (
         <div className="flex h-8 items-center justify-center gap-2 text-lg">
           <Spinner />
           <p>{labelsDict.file.uploading}</p>
