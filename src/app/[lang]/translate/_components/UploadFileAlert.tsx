@@ -26,14 +26,6 @@ import { Subtitle } from '@/lib/fcpxmlParser';
 import { importExcelFile } from '@/lib/xlsxUtils';
 import { LabelsDictionary } from '@/app/dictionaries';
 
-export type UploadFileAlertLabels = {
-  alertTrigger: string;
-  alertTitle: string;
-  alertDescription: string;
-  action: string;
-  cancel: string;
-};
-
 export default function UploadFileAlert({
   subtitlesCount,
   setTranslatedSubtitles,
