@@ -1,23 +1,30 @@
 'use client';
 
+import { ChangeEvent, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useUploadToS3 } from 'use-upload-to-s3';
+import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Spinner from '@/components/ui/Spinner';
-import { LabelsDictionary } from '@/app/dictionaries';
-import { useUploadToS3 } from 'use-upload-to-s3';
-import { ChangeEvent, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Switch } from '@/components/ui/switch';
-import { toast } from 'sonner';
+import { LabelsDictionary } from '@/app/dictionaries';
 import { encrypt } from '@/lib/encryptionUtils';
 
-const supportedLanguages = ['FRA', 'ESP', 'ARA', 'ITA', 'RUS'] as const;
+const SUPPORTED_LANGUAGES = ['FRA', 'ESP', 'ARA', 'ITA', 'RUS'] as const;
+type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
-export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
+interface UploadFileProps {
+  labelsDict: LabelsDictionary;
+}
+
+export function UploadFile({ labelsDict }: UploadFileProps) {
   const router = useRouter();
-  const [languages, setLanguages] = useState<
-    (typeof supportedLanguages)[number][]
-  >(['FRA', 'ESP', 'ARA']);
+  const [languages, setLanguages] = useState<SupportedLanguage[]>([
+    'FRA',
+    'ESP',
+    'ARA',
+  ]);
   const [isLoading, setIsLoading] = useState(false);
 
   const [handleInputChange, s3key, isPending, error] = useUploadToS3(
@@ -26,7 +33,6 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
       accept: '.fcpxml',
       sizeLimit: '50mb',
       async onUploadComplete(s3key) {
-        // It's inexpensive, so we can await it
         const encryptedFilename = await encrypt(s3key);
         router.push(
           `/translate?file=${encryptedFilename}&langs=${languages.join(',')}`,
@@ -39,15 +45,22 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
   );
 
   useEffect(() => {
-    if (error !== null) {
-      setIsLoading(false);
-    }
+    if (error) setIsLoading(false);
   }, [error]);
 
-  async function customHandleInputChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]!;
-    handleInputChange(event);
-  }
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setIsLoading(true);
+      handleInputChange(event);
+    }
+  };
+
+  const toggleLanguage = (lang: SupportedLanguage, checked: boolean) => {
+    setLanguages((prev) =>
+      checked ? [...prev, lang] : prev.filter((l) => l !== lang),
+    );
+  };
 
   return (
     <form className="m-auto flex flex-col items-center gap-4">
@@ -61,38 +74,66 @@ export function UploadFile({ labelsDict }: { labelsDict: LabelsDictionary }) {
           id="file"
           accept=".fcpxml"
           required
-          onChange={customHandleInputChange}
+          onChange={handleFileChange}
           disabled={isLoading}
         />
       </div>
       <ul className="flex items-center gap-6">
-        {supportedLanguages.map((lang) => (
-          <li key={lang} className="flex flex-col items-center">
-            <label htmlFor={lang}>{lang}</label>
-            <Switch
-              id={lang}
-              checked={languages.includes(lang)}
-              disabled={isLoading}
-              onCheckedChange={(checked) =>
-                setLanguages((prev) =>
-                  checked ? [...prev, lang] : prev.filter((l) => l !== lang),
-                )
-              }
-            />
-          </li>
+        {SUPPORTED_LANGUAGES.map((lang) => (
+          <LanguageToggle
+            key={lang}
+            lang={lang}
+            checked={languages.includes(lang)}
+            disabled={isLoading}
+            onChange={toggleLanguage}
+          />
         ))}
       </ul>
       {isLoading ? (
-        <div className="flex h-8 items-center justify-center gap-2 text-lg">
-          <Spinner />
-          <p>{labelsDict.file.uploading}</p>
-        </div>
+        <LoadingIndicator label={labelsDict.file.uploading} />
       ) : null}
-      {error ? (
-        <p className="text-center font-light text-red-600">
-          Error: {error.message}
-        </p>
-      ) : null}
+      {error ? <ErrorMessage message={error.message} /> : null}
     </form>
+  );
+}
+
+interface LanguageToggleProps {
+  lang: SupportedLanguage;
+  checked: boolean;
+  disabled: boolean;
+  onChange: (lang: SupportedLanguage, checked: boolean) => void;
+}
+
+function LanguageToggle({
+  lang,
+  checked,
+  disabled,
+  onChange,
+}: LanguageToggleProps) {
+  return (
+    <li className="flex flex-col items-center">
+      <label htmlFor={lang}>{lang}</label>
+      <Switch
+        id={lang}
+        checked={checked}
+        disabled={disabled}
+        onCheckedChange={(checked) => onChange(lang, checked)}
+      />
+    </li>
+  );
+}
+
+function LoadingIndicator({ label }: { label: string }) {
+  return (
+    <div className="flex h-8 items-center justify-center gap-2 text-lg">
+      <Spinner />
+      <p>{label}</p>
+    </div>
+  );
+}
+
+function ErrorMessage({ message }: { message: string }) {
+  return (
+    <p className="text-center font-light text-red-600">Error: {message}</p>
   );
 }

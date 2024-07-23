@@ -9,93 +9,106 @@ import fileContentToS3 from './fileContentToS3';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-const refColName = 'Ref';
-const subtitleColName = 'Subtitle';
+const REF_COL_NAME = 'Ref';
+const SUBTITLE_COL_NAME = 'Subtitle';
+const S3_BUCKET = 'translate-subtitles-app-uploads';
+const S3_REGION = 'eu-west-3';
 
+// Excel file creation
 export async function createExcelFileDataFromSubtitles(
   subtitles: Subtitle[],
   name: string,
   lang: string,
-) {
+): Promise<Buffer> {
   const workbook = new Workbook();
   const worksheet = workbook.addWorksheet(name.slice(0, 31));
 
-  worksheet.columns = [
-    { header: refColName, key: refColName, width: 5 },
-    { header: subtitleColName, key: subtitleColName, width: 70 },
-    { header: lang, key: lang, width: 70 },
-  ];
-
-  const refCol = worksheet.getColumn(refColName);
-  refCol.values = [
-    {
-      richText: [{ text: refColName, font: { bold: true, size: 12 } }],
-    },
-    ...subtitles.map((_, index) => {
-      return index + 1;
-    }),
-  ];
-
-  const subtitleCol = worksheet.getColumn(subtitleColName);
-  subtitleCol.values = [
-    {
-      richText: [{ text: subtitleColName, font: { bold: true, size: 12 } }],
-    },
-    ...subtitles.map((subtitle) => {
-      return {
-        richText: subtitle.titles.map((title) => {
-          return {
-            text: title.text + ' ',
-            font: {
-              size: 12,
-              color:
-                title.text === '§'
-                  ? { argb: '00FF00' }
-                  : title.highlighted
-                    ? { argb: 'FF0000' }
-                    : undefined,
-            },
-          };
-        }),
-      };
-    }),
-  ];
-
-  const langCol = worksheet.getColumn(lang);
-  langCol.values = [
-    {
-      richText: [{ text: lang, font: { bold: true, size: 12 } }],
-    },
-  ];
+  setupWorksheetColumns(worksheet, lang);
+  populateRefColumn(worksheet, subtitles);
+  populateSubtitleColumn(worksheet, subtitles);
+  populateLangColumn(worksheet, lang);
 
   return workbook.xlsx.writeBuffer();
 }
 
+function setupWorksheetColumns(worksheet: Worksheet, lang: string) {
+  worksheet.columns = [
+    { header: REF_COL_NAME, key: REF_COL_NAME, width: 5 },
+    { header: SUBTITLE_COL_NAME, key: SUBTITLE_COL_NAME, width: 70 },
+    { header: lang, key: lang, width: 70 },
+  ];
+}
+
+function populateRefColumn(worksheet: Worksheet, subtitles: Subtitle[]) {
+  const refCol = worksheet.getColumn(REF_COL_NAME);
+  refCol.values = [
+    createHeaderCell(REF_COL_NAME),
+    ...subtitles.map((_, index) => index + 1),
+  ];
+}
+
+function populateSubtitleColumn(worksheet: Worksheet, subtitles: Subtitle[]) {
+  const subtitleCol = worksheet.getColumn(SUBTITLE_COL_NAME);
+  subtitleCol.values = [
+    createHeaderCell(SUBTITLE_COL_NAME),
+    ...subtitles.map(createSubtitleCell),
+  ];
+}
+
+function populateLangColumn(worksheet: Worksheet, lang: string) {
+  const langCol = worksheet.getColumn(lang);
+  langCol.values = [createHeaderCell(lang)];
+}
+
+function createHeaderCell(text: string) {
+  return {
+    richText: [{ text, font: { bold: true, size: 12 } }],
+  };
+}
+
+function createSubtitleCell(subtitle: Subtitle) {
+  return {
+    richText: subtitle.titles.map((title) => ({
+      text: title.text + ' ',
+      font: {
+        size: 12,
+        color: getTextColor(title),
+      },
+    })),
+  };
+}
+
+function getTextColor(title: { text: string; highlighted: boolean }) {
+  if (title.text === '§') return { argb: '00FF00' };
+  if (title.highlighted) return { argb: 'FF0000' };
+  return undefined;
+}
+
+// Zip file creation
 export async function createZipFromSubtitles(
   subtitles: Subtitle[],
   name: string,
   langs: string[],
-) {
+): Promise<{ url: string; zipFilename: string }> {
   const zip = new JSZip();
 
-  langs.forEach(async (lang) => {
-    const arrayBuffer = createExcelFileDataFromSubtitles(subtitles, name, lang);
-    zip.file(`${name} - SUB ${lang}.xlsx`, arrayBuffer);
-  });
+  await Promise.all(
+    langs.map(async (lang) => {
+      const arrayBuffer = await createExcelFileDataFromSubtitles(
+        subtitles,
+        name,
+        lang,
+      );
+      zip.file(`${name} - SUB ${lang}.xlsx`, arrayBuffer);
+    }),
+  );
 
   try {
     const zipFilename = `${name} - SUB.zip`;
     const zipBuffer = await zip.generateAsync({ type: 'uint8array' });
     await fileContentToS3(zipFilename, zipBuffer);
 
-    const s3Client = new S3Client({ region: 'eu-west-3' });
-
-    // Get a pre-signed URL to download the file.
-    const getCommand = new GetObjectCommand({
-      Bucket: 'translate-subtitles-app-uploads',
-      Key: zipFilename,
-    });
-    const url = await getSignedUrl(s3Client, getCommand, { expiresIn: 600 });
+    const url = await getS3SignedUrl(zipFilename);
 
     return { url, zipFilename };
   } catch (e) {
@@ -106,20 +119,48 @@ export async function createZipFromSubtitles(
   }
 }
 
-function stringFromCellValue(cellValue: CellValue) {
-  let name: string;
-  switch (typeof cellValue) {
-    case 'string':
-      return cellValue;
-    case 'object':
-      if (cellValue !== null && 'richText' in cellValue) {
-        return cellValue.richText.map((text: any) => text.text).join('');
-      }
+async function getS3SignedUrl(filename: string): Promise<string> {
+  const s3Client = new S3Client({ region: S3_REGION });
+  const getCommand = new GetObjectCommand({
+    Bucket: S3_BUCKET,
+    Key: filename,
+  });
+  return getSignedUrl(s3Client, getCommand, { expiresIn: 600 });
+}
+
+// Excel file import
+export async function importExcelFile(file: File) {
+  const buffer = await file.arrayBuffer();
+  const workbook = new Workbook();
+  await workbook.xlsx.load(buffer);
+
+  const worksheet = workbook.getWorksheet(1);
+  if (!worksheet) {
+    throw new Error('Aucune feuille de calcul trouvée');
   }
-  // if it doesn't match any of the above cases, throw an error
-  throw new Error(
-    `Impossible de récupérer le contenu de la cellule - ${cellValue}`,
-  );
+
+  validateWorksheet(worksheet);
+
+  const translatedSubtitlesColumns = extractColumn(worksheet, 3);
+
+  return {
+    translations: columnToSubtitle(translatedSubtitlesColumns.column),
+    language: translatedSubtitlesColumns.name,
+  };
+}
+
+function validateWorksheet(worksheet: Worksheet) {
+  const refColumn = extractColumn(worksheet, 1);
+  if (refColumn.name !== REF_COL_NAME) {
+    throw new Error(`La première colonne doit être nommée "${REF_COL_NAME}"`);
+  }
+
+  const originalSubtitlesColumn = extractColumn(worksheet, 2);
+  if (originalSubtitlesColumn.name !== SUBTITLE_COL_NAME) {
+    throw new Error(
+      `La deuxième colonne doit être nommée "${SUBTITLE_COL_NAME}"`,
+    );
+  }
 }
 
 function extractColumn(worksheet: Worksheet, columnNumber: number) {
@@ -139,37 +180,27 @@ function extractColumn(worksheet: Worksheet, columnNumber: number) {
   return { name, column };
 }
 
-function columnToSubtitle(column: CellValue[]): Subtitle[] {
-  let subtitles = [] as Subtitle[];
-  for (const cellValue of column) {
-    switch (typeof cellValue) {
-      case 'string':
-        subtitles.push({
-          titles: [{ text: cellValue, highlighted: false }],
-        });
-        break;
-      case 'number':
-        subtitles.push({
-          titles: [{ text: cellValue.toString(), highlighted: false }],
-        });
-        break;
-      case 'object':
-        if (cellValue !== null && 'richText' in cellValue) {
-          const titles = [] as { text: string; highlighted: boolean }[];
-          for (const text of cellValue.richText) {
-            if (text.text.trim() !== '') {
-              titles.push({
-                text: text.text,
-                highlighted:
-                  text.font?.color?.theme !== 1 &&
-                  text.font?.color !== undefined,
-              });
-            }
-          }
-          subtitles.push({ titles });
-        }
-    }
+function stringFromCellValue(cellValue: CellValue): string {
+  switch (true) {
+    case typeof cellValue === 'string':
+      return cellValue;
+    case typeof cellValue === 'number':
+      return cellValue.toString();
+    case typeof cellValue === 'object' &&
+      cellValue !== null &&
+      'richText' in cellValue:
+      return cellValue.richText.map((text: any) => text.text).join('');
+    default:
+      throw new Error(
+        `Impossible de récupérer le contenu de la cellule - ${cellValue}`,
+      );
   }
+}
+
+function columnToSubtitle(column: CellValue[]): Subtitle[] {
+  const subtitles = column
+    .map(cellValueToSubtitle)
+    .filter((subtitle): subtitle is Subtitle => subtitle !== null);
   if (subtitles.length === 0) {
     throw new Error(
       `Aucun sous-titre trouvé dans la colonne: ${JSON.stringify(column, null, 2)}`,
@@ -178,33 +209,31 @@ function columnToSubtitle(column: CellValue[]): Subtitle[] {
   return subtitles;
 }
 
-export async function importExcelFile(file: File) {
-  const buffer = await file.arrayBuffer();
-  const workbook = new Workbook();
-  await workbook.xlsx.load(buffer);
+function cellValueToSubtitle(cellValue: CellValue): Subtitle | null {
+  switch (true) {
+    case cellValue === null || cellValue === undefined:
+      return null;
 
-  const worksheet = workbook.getWorksheet(1);
-  if (!worksheet) {
-    throw new Error('Aucune feuille de calcul trouvée');
+    case typeof cellValue === 'string':
+      return { titles: [{ text: cellValue, highlighted: false }] };
+
+    case typeof cellValue === 'number':
+      return { titles: [{ text: cellValue.toString(), highlighted: false }] };
+
+    case typeof cellValue === 'object' &&
+      // @ts-ignore case cellValue is null has been tested
+      'richText' in cellValue:
+      const titles = cellValue.richText
+        .filter((richTextElement: any) => richTextElement.text.trim() !== '')
+        .map((richTextElement: any) => ({
+          text: richTextElement.text.trim() === '§' ? '' : richTextElement.text,
+          highlighted:
+            richTextElement.font?.color?.theme !== 1 &&
+            richTextElement.font?.color !== undefined,
+        }));
+      return { titles };
+
+    default:
+      return null;
   }
-
-  const refColumn = extractColumn(worksheet, 1);
-  if (refColumn.name !== refColName) {
-    throw new Error(`La première colonne doit être nommée "${refColName}"`);
-  }
-  // TODO : reorder subtitles if refs are not in order
-
-  const originalSubtitlesColumn = extractColumn(worksheet, 2);
-  if (originalSubtitlesColumn.name !== subtitleColName) {
-    throw new Error(
-      `La deuxième colonne doit être nommée "${subtitleColName}"`,
-    );
-  }
-  const translatedSubtitlesColumns = extractColumn(worksheet, 3);
-
-  return {
-    // originalSubtitles: columnToSubtitle(originalSubtitlesColumn.column),
-    translations: columnToSubtitle(translatedSubtitlesColumns.column),
-    language: translatedSubtitlesColumns.name,
-  };
 }
