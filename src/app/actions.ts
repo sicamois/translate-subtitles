@@ -1,15 +1,9 @@
 'use server';
 
-import {
-  exctractFCPXML,
-  extractSubtitles,
-  extractVideoTitle,
-  replaceSubtitlesInFCPXML,
-} from '@/lib/fcpxmlParser';
+import { exctractFCPXML, replaceSubtitlesInFCPXML } from '@/lib/fcpxmlParser';
 import type { Subtitle } from '@/lib/fcpxmlParser';
 import { XMLBuilder } from 'fast-xml-parser';
 import fileContentToS3 from '@/lib/fileContentToS3';
-import { createZipFromSubtitles } from '@/lib/xlsxUtils';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -59,27 +53,3 @@ export async function createFcpxmlFile(
 
   return { filename, url };
 }
-
-// export async function createZipUrlFromSubtitles(
-//   subtitles: Subtitle[],
-//   langs: string[],
-// ) {
-//   const fcpxml = await exctractFCPXML(fcpxmlFilename);
-//   const videoTitle = extractVideoTitle(fcpxml);
-//   const subtitles = await extractSubtitles(fcpxml);
-
-//   const zipFilename = await createZipFromSubtitles(
-//     subtitles,
-//     videoTitle,
-//     langs,
-//   );
-
-//   // Get a pre-signed URL to download the file.
-//   const getCommand = new GetObjectCommand({
-//     Bucket: 'translate-subtitles-app-uploads',
-//     Key: zipFilename,
-//   });
-//   const url = await getSignedUrl(s3Client, getCommand, { expiresIn: 600 });
-
-//   return url;
-// }

@@ -9,25 +9,23 @@ import {
 } from '@/components/ui/table';
 import type { Subtitle } from '@/lib/fcpxmlParser';
 
+interface SubtitlesTableProps {
+  originalSubtitles: Subtitle[];
+  translatedSubtitles?: Subtitle[];
+  language?: string;
+}
+
 export default function SubtitlesTable({
   originalSubtitles,
   translatedSubtitles,
   language,
-}: {
-  originalSubtitles: Subtitle[];
-  translatedSubtitles?: Subtitle[];
-  language?: string;
-}) {
-  let headers = ['Ref', 'Subtitle'];
-  if (language) {
-    headers.push(language);
-  }
+}: SubtitlesTableProps) {
+  const headers = ['Ref', 'Subtitle', ...(language ? [language] : [])];
 
-  const subtitleTableData: [Subtitle, Subtitle | undefined][] =
-    originalSubtitles.map((subtitle, index) => [
-      subtitle,
-      translatedSubtitles ? translatedSubtitles[index] : undefined,
-    ]);
+  const subtitleTableData = originalSubtitles.map((subtitle, index) => [
+    subtitle,
+    translatedSubtitles?.[index],
+  ]);
 
   return (
     <Table className="m-auto w-fit overflow-hidden">
@@ -35,11 +33,11 @@ export default function SubtitlesTable({
         <TableRow>
           {headers.map((header, index) => (
             <TableHead
-              key={index}
+              key={header}
               className={cn(
                 'font-medium drop-shadow',
-                index === 0 ? 'rounded-s-md' : 0,
-                index === headers.length - 1 ? 'rounded-e-md' : '',
+                index === 0 && 'rounded-s-md',
+                index === headers.length - 1 && 'rounded-e-md',
               )}
             >
               {header}
@@ -48,39 +46,57 @@ export default function SubtitlesTable({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {subtitleTableData.map((subtitleTableRowData, index) => (
+        {subtitleTableData.map((row, rowIndex) => (
           <TableRow
-            key={index}
+            key={rowIndex}
             className="divide-x divide-dashed divide-muted py-2"
           >
             <TableCell className="py-2">
-              <p>{index + 1}</p>
+              <p>{rowIndex + 1}</p>
             </TableCell>
-            {subtitleTableRowData.map((subtitle, subindex) =>
-              subtitle ? (
-                <TableCell
-                  key={`${index}-${subindex}`}
-                  className="w-[25rem] font-medium"
-                >
-                  <div className="flex flex-wrap justify-center gap-1 text-center">
-                    {subtitle.titles.map((title) =>
-                      title.text === '§' ? (
-                        <p key={title.text} className="w-full" />
-                      ) : title.highlighted ? (
-                        <p key={title.text} className="text-red-500">
-                          {title.text}
-                        </p>
-                      ) : (
-                        <p key={title.text}>{title.text}</p>
-                      ),
-                    )}
-                  </div>
-                </TableCell>
-              ) : null,
+            {row.map(
+              (subtitle, colIndex) =>
+                subtitle && (
+                  <SubtitleCell
+                    key={`${rowIndex}-${colIndex}`}
+                    subtitle={subtitle}
+                  />
+                ),
             )}
           </TableRow>
         ))}
       </TableBody>
     </Table>
+  );
+}
+
+interface SubtitleCellProps {
+  subtitle: Subtitle;
+}
+
+function SubtitleCell({ subtitle }: SubtitleCellProps) {
+  return (
+    <TableCell className="w-[25rem] font-medium">
+      <div className="flex flex-wrap justify-center gap-1 text-center">
+        {subtitle.titles.map((title, index) => (
+          <SubtitleText key={`${title.text}-${index}`} title={title} />
+        ))}
+      </div>
+    </TableCell>
+  );
+}
+
+interface SubtitleTextProps {
+  title: { text: string; highlighted?: boolean };
+}
+
+function SubtitleText({ title }: SubtitleTextProps) {
+  if (title.text === '§') {
+    return <p className="w-full" />;
+  }
+  return (
+    <p className={title.highlighted ? 'text-red-500' : undefined}>
+      {title.text}
+    </p>
   );
 }
